@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nearbite Admin</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="layout.css" />
+<link rel="stylesheet" href="upload-widget.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ============================== SIDEBAR ============================== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="mark">N</div>
+      <div>
+        <div class="name">Nearbite</div>
+        <div class="tag">Admin</div>
+      </div>
+    </div>
+
+    <ul class="nav-list">
+      <li>
+        <button class="nav-item active" data-view="dashboard">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
+          Dashboard
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-view="create-vendor">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5V19a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z"/><path d="M9.5 10.5h5M12 8v5"/></svg></span>
+          Create Vendor
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-view="manage-vendors">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16.5 8.3a3 3 0 1 1 0 5.9M19.5 20a5 5 0 0 0-4-4.9"/></svg></span>
+          Manage Vendors
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-view="manage-restaurants">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5h18v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z"/><path d="M9 19.5v-6h6v6"/></svg></span>
+          Manage Restaurants
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-view="manage-categories">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 3H5a2 2 0 0 0-2 2v7.5a2 2 0 0 0 .59 1.41l9.5 9.5a2 2 0 0 0 2.82 0l7-7a2 2 0 0 0 0-2.82l-9.5-9.5A2 2 0 0 0 12.5 3Z"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></span>
+          Manage Categories
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-view="manage-menu">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v18M4 3h11l-2 4 2 4H4"/><path d="M17 3v18"/><path d="M20 3v6a2 2 0 0 1-2 2"/><path d="M20 3v18"/></svg></span>
+          Manage Menu
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-view="manage-orders">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 11h6M9 15h6"/></svg></span>
+          Manage Orders
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-view="manage-riders">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M5.5 17.5 9 10h4l3 4.5"/><path d="M9 10 8 6h3"/><path d="M12 14h6.5"/></svg></span>
+          Manage Riders
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-view="manage-customers">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
+          Manage Customers
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-admin">
+        <div class="avatar" id="admin-avatar">A</div>
+        <div class="who">
+          <div class="n" id="admin-name">Admin</div>
+          <div class="r" id="admin-role">Administrator</div>
+        </div>
+      </div>
+      <ul class="nav-list">
+        <li>
+          <button class="nav-item" id="logout-btn">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h12"/></svg></span>
+            Logout
+          </button>
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- ================================ MAIN ================================ -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <h1 id="page-title">Dashboard</h1>
+        <div class="sub" id="page-sub">Live snapshot of the Nearbite ops today</div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- ── Dashboard ─────────────────────────────────────────── -->
+      <section class="view active" id="view-dashboard">
+        <div class="stat-grid" id="stat-grid">
+          <!-- stat cards injected by dashboard.js -->
+        </div>
+
+        <div class="panel-grid">
+          <div class="card panel">
+            <div class="panel-head">
+              <h3>Recent orders</h3>
+            </div>
+            <div id="recent-orders-wrap">
+              <div class="state-block"><div class="spinner-lg"></div></div>
+            </div>
+          </div>
+
+          <div class="card panel">
+            <div class="panel-head">
+              <h3>Peak hours today</h3>
+            </div>
+            <div id="peak-hours-wrap">
+              <div class="state-block"><div class="spinner-lg"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Create Vendor ─────────────────────────────────────── -->
+      <section class="view" id="view-create-vendor">
+        <form class="card form-card" id="create-vendor-form" novalidate>
+
+          <div class="form-section">
+            <div class="form-section-title">Vendor account</div>
+            <div class="form-grid">
+              <div class="field">
+                <label for="cv-vendorName">Vendor name</label>
+                <input type="text" id="cv-vendorName" placeholder="Ramesh Das" />
+                <div class="error-msg" data-error-for="cv-vendorName"></div>
+              </div>
+              <div class="field">
+                <label for="cv-vendorPhone">Vendor phone *</label>
+                <input type="text" id="cv-vendorPhone" placeholder="+919876543210" />
+                <div class="error-msg" data-error-for="cv-vendorPhone"></div>
+              </div>
+              <div class="field">
+                <label for="cv-vendorEmail">Vendor email *</label>
+                <input type="email" id="cv-vendorEmail" placeholder="owner@example.com" />
+                <div class="error-msg" data-error-for="cv-vendorEmail"></div>
+              </div>
+              <div class="field">
+                <label for="cv-vendorPassword">Vendor password *</label>
+                <input type="password" id="cv-vendorPassword" placeholder="Min. 6 characters" />
+                <div class="error-msg" data-error-for="cv-vendorPassword"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Restaurant details</div>
+            <div class="form-grid">
+              <div class="field span-2">
+                <label for="cv-restaurantName">Restaurant name *</label>
+                <input type="text" id="cv-restaurantName" placeholder="Maynaguri Biryani House" />
+                <div class="error-msg" data-error-for="cv-restaurantName"></div>
+              </div>
+
+              <div class="field">
+                <label for="cv-cuisine">Cuisine *</label>
+                <input type="text" id="cv-cuisine" placeholder="Biryani, Mughlai (comma-separated)" />
+                <div class="hint">Separate multiple cuisines with commas.</div>
+                <div class="error-msg" data-error-for="cv-cuisine"></div>
+              </div>
+              <div class="field">
+                <label for="cv-categories">Categories</label>
+                <input type="text" id="cv-categories" placeholder="Biryani, Lunch, Thali" />
+                <div class="hint">Homepage filter chips, comma-separated.</div>
+              </div>
+
+              <div class="field span-2">
+                <label for="cv-address">Address</label>
+                <input type="text" id="cv-address" placeholder="Main Road, Maynaguri" />
+              </div>
+
+              <div class="field span-2">
+                <label>Restaurant image</label>
+                <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="cv-image">
+                  <div class="img-upload-preview" data-preview>
+                    <span class="img-upload-empty" data-empty>No image yet</span>
+                  </div>
+                  <label class="btn btn-ghost btn-sm img-upload-btn">
+                    <span data-btn-label>Upload image</span>
+                    <input type="file" accept="image/*" data-file-input hidden />
+                  </label>
+                  <div class="img-upload-progress" data-progress-wrap style="display:none;">
+                    <div class="img-upload-progress-fill" data-progress-fill></div>
+                  </div>
+                </div>
+                <input type="hidden" id="cv-image" />
+                <div class="error-msg" data-error-for="cv-image"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Delivery &amp; pricing</div>
+            <div class="form-grid">
+              <div class="field">
+                <label for="cv-deliveryMin">Delivery time — min (mins) *</label>
+                <input type="number" id="cv-deliveryMin" min="1" placeholder="30" />
+                <div class="error-msg" data-error-for="cv-deliveryMin"></div>
+              </div>
+              <div class="field">
+                <label for="cv-deliveryMax">Delivery time — max (mins) *</label>
+                <input type="number" id="cv-deliveryMax" min="1" placeholder="40" />
+                <div class="error-msg" data-error-for="cv-deliveryMax"></div>
+              </div>
+              <div class="field">
+                <label for="cv-deliveryFee">Delivery fee (₹)</label>
+                <input type="number" id="cv-deliveryFee" min="0" placeholder="40" />
+              </div>
+              <div class="field">
+                <label for="cv-platformFee">Platform fee (₹)</label>
+                <input type="number" id="cv-platformFee" min="0" placeholder="5" />
+              </div>
+              <div class="field">
+                <label for="cv-minOrder">Minimum order (₹)</label>
+                <input type="number" id="cv-minOrder" min="0" placeholder="0" />
+              </div>
+              <div class="field">
+                <label for="cv-freeDeliveryAbove">Free delivery above (₹)</label>
+                <input type="number" id="cv-freeDeliveryAbove" min="0" placeholder="200" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Location &amp; type</div>
+            <div class="form-grid">
+              <div class="field">
+                <label for="cv-longitude">Longitude</label>
+                <input type="number" step="any" id="cv-longitude" placeholder="88.3832" />
+                <div class="error-msg" data-error-for="cv-longitude"></div>
+              </div>
+              <div class="field">
+                <label for="cv-latitude">Latitude</label>
+                <input type="number" step="any" id="cv-latitude" placeholder="26.5233" />
+                <div class="error-msg" data-error-for="cv-latitude"></div>
+              </div>
+              <div class="field span-2">
+                <div class="checkbox-row">
+                  <input type="checkbox" id="cv-isVeg" />
+                  <label for="cv-isVeg" style="text-transform:none;font-weight:500;letter-spacing:0;">Pure vegetarian restaurant</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="cv-submit-btn">
+              <span id="cv-submit-text">Create vendor</span>
+            </button>
+            <button type="reset" class="btn btn-ghost" id="cv-reset-btn">Clear form</button>
+            <div class="form-result" id="cv-result"></div>
+          </div>
+        </form>
+      </section>
+
+      <!-- ── Manage Vendors ────────────────────────────────────── -->
+      <section class="view" id="view-manage-vendors">
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="vendors-search" placeholder="Search vendors by name, email, phone…" />
+            </div>
+            <select id="vendors-status-filter">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Deactivated</option>
+            </select>
+            <span class="toolbar-count" id="vendors-count"></span>
+          </div>
+          <div class="table-wrap" id="vendors-table-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+          <div class="table-footer" id="vendors-footer" style="display:none;">
+            <span class="pagination-info" id="vendors-page-info"></span>
+            <div class="pagination" id="vendors-pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Manage Restaurants ─────────────────────────────────── -->
+      <section class="view" id="view-manage-restaurants">
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="restaurants-search" placeholder="Search restaurants by name…" />
+            </div>
+            <select id="restaurants-status-filter">
+              <option value="all">All statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Deactivated</option>
+            </select>
+            <span class="toolbar-count" id="restaurants-count"></span>
+          </div>
+          <div class="table-wrap" id="restaurants-table-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Manage Categories ──────────────────────────────────── -->
+      <section class="view" id="view-manage-categories">
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <div class="sub" style="margin:0;">Drag a row to change the order it shows in on the homepage.</div>
+            <button class="btn btn-primary btn-sm" id="category-add-btn">+ Add category</button>
+          </div>
+          <div id="categories-list-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Manage Menu ─────────────────────────────────────────── -->
+      <section class="view" id="view-manage-menu">
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <select id="menu-restaurant-select">
+              <option value="">Select a restaurant…</option>
+            </select>
+            <span class="toolbar-count" id="menu-count"></span>
+            <button class="btn btn-primary btn-sm" id="menu-add-btn" disabled>+ Add item</button>
+          </div>
+          <div class="table-wrap" id="menu-table-wrap">
+            <div class="state-block">
+              <h4>Pick a restaurant</h4>
+              <p>Choose a restaurant above to view and manage its menu.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Manage Orders ──────────────────────────────────────── -->
+      <section class="view" id="view-manage-orders">
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="orders-search" placeholder="Search by order # or restaurant…" />
+            </div>
+            <select id="orders-status-filter">
+              <option value="">All statuses</option>
+              <option value="placed">Placed</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="preparing">Preparing</option>
+              <option value="out_for_delivery">Out for delivery</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <span class="toolbar-count" id="orders-count"></span>
+          </div>
+          <div class="table-wrap" id="orders-table-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+          <div class="table-footer" id="orders-footer" style="display:none;">
+            <span class="pagination-info" id="orders-page-info"></span>
+            <div class="pagination" id="orders-pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Manage Riders ──────────────────────────────────────── -->
+      <section class="view" id="view-manage-riders">
+        <div class="stat-grid" id="riders-stat-grid">
+          <div class="card stat-card">
+            <div class="stat-label">Total riders</div>
+            <div class="stat-value mono" id="riders-stat-total">—</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-label"><span class="live-dot"></span>Online</div>
+            <div class="stat-value mono" id="riders-stat-online">—</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-label">Offline</div>
+            <div class="stat-value mono" id="riders-stat-offline">—</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-label">Active deliveries</div>
+            <div class="stat-value mono" id="riders-stat-active">—</div>
+            <div class="stat-sub">Live tracking coming soon</div>
+          </div>
+        </div>
+
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="riders-search" placeholder="Search riders by name, phone, email, vehicle no…" />
+            </div>
+            <select id="riders-online-filter">
+              <option value="">All riders</option>
+              <option value="true">Online</option>
+              <option value="false">Offline</option>
+            </select>
+            <select id="riders-status-filter">
+              <option value="">All statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Disabled</option>
+            </select>
+            <span class="toolbar-count" id="riders-count"></span>
+            <button class="btn btn-primary btn-sm" id="rider-add-btn">+ Add rider</button>
+          </div>
+          <div class="table-wrap" id="riders-table-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+          <div class="table-footer" id="riders-footer" style="display:none;">
+            <span class="pagination-info" id="riders-page-info"></span>
+            <div class="pagination" id="riders-pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Manage Customers ───────────────────────────────────── -->
+      <section class="view" id="view-manage-customers">
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="customers-search" placeholder="Search by name, phone, or email…" />
+            </div>
+            <span class="toolbar-count" id="customers-count"></span>
+          </div>
+          <div class="table-wrap" id="customers-table-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+          <div class="table-footer" id="customers-footer" style="display:none;">
+            <span class="pagination-info" id="customers-page-info"></span>
+            <div class="pagination" id="customers-pagination"></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════ MODALS ═══════════════════════ -->
+
+<!-- Edit Vendor -->
+<div class="modal-overlay" id="vendor-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Edit vendor</h3>
+      <button class="modal-close" data-close-modal="vendor-modal">✕</button>
+    </div>
+    <form id="vendor-edit-form">
+      <div class="modal-body">
+        <input type="hidden" id="vm-id" />
+        <div class="field">
+          <label for="vm-name">Name</label>
+          <input type="text" id="vm-name" />
+          <div class="error-msg" data-error-for="vm-name"></div>
+        </div>
+        <div class="field">
+          <label for="vm-email">Email</label>
+          <input type="email" id="vm-email" />
+          <div class="error-msg" data-error-for="vm-email"></div>
+        </div>
+        <div class="field">
+          <label for="vm-phone">Phone</label>
+          <input type="text" id="vm-phone" />
+          <div class="error-msg" data-error-for="vm-phone"></div>
+        </div>
+        <div class="field">
+          <label for="vm-password">Reset password <span style="text-transform:none;font-weight:400;">(optional)</span></label>
+          <input type="password" id="vm-password" placeholder="Leave blank to keep current password" />
+          <div class="error-msg" data-error-for="vm-password"></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <div class="modal-result" id="vendor-modal-result"></div>
+        <button type="button" class="btn btn-ghost" data-close-modal="vendor-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="vendor-modal-save">
+          <span id="vendor-modal-save-text">Save changes</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Restaurant -->
+<div class="modal-overlay" id="restaurant-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Edit restaurant</h3>
+      <button class="modal-close" data-close-modal="restaurant-modal">✕</button>
+    </div>
+    <form id="restaurant-edit-form">
+      <div class="modal-body">
+        <input type="hidden" id="rm-id" />
+        <div class="field">
+          <label for="rm-name">Name</label>
+          <input type="text" id="rm-name" />
+          <div class="error-msg" data-error-for="rm-name"></div>
+        </div>
+        <div class="field">
+          <label for="rm-address">Address</label>
+          <input type="text" id="rm-address" />
+        </div>
+        <div class="field">
+          <label for="rm-cuisine">Cuisine</label>
+          <input type="text" id="rm-cuisine" placeholder="Comma-separated" />
+          <div class="error-msg" data-error-for="rm-cuisine"></div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="rm-deliveryFee">Delivery fee (₹)</label>
+            <input type="number" id="rm-deliveryFee" min="0" />
+          </div>
+          <div class="field">
+            <label for="rm-platformFee">Platform fee (₹)</label>
+            <input type="number" id="rm-platformFee" min="0" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Restaurant image</label>
+          <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="rm-image">
+            <div class="img-upload-preview" data-preview>
+              <span class="img-upload-empty" data-empty>No image yet</span>
+            </div>
+            <label class="btn btn-ghost btn-sm img-upload-btn">
+              <span data-btn-label>Upload image</span>
+              <input type="file" accept="image/*" data-file-input hidden />
+            </label>
+            <div class="img-upload-progress" data-progress-wrap style="display:none;">
+              <div class="img-upload-progress-fill" data-progress-fill></div>
+            </div>
+          </div>
+          <input type="hidden" id="rm-image" />
+          <div class="error-msg" data-error-for="rm-image"></div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--border,#e5e7eb);margin:20px 0;" />
+
+        <div class="field">
+          <label>Availability</label>
+          <div id="rm-availability-badge" style="margin-bottom:10px;"></div>
+        </div>
+        <div class="field">
+          <label for="rm-availability-status">Status</label>
+          <select id="rm-availability-status">
+            <option value="open">Open</option>
+            <option value="closed_today">Closed Today</option>
+            <option value="temporarily_closed">Temporarily Closed</option>
+          </select>
+        </div>
+        <div class="field">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <label class="switch">
+              <input type="checkbox" id="rm-auto-hours" />
+              <span class="track"></span>
+            </label>
+            <span>Auto Hours (hours managed automatically)</span>
+          </label>
+        </div>
+        <div class="field-row" id="rm-hours-row">
+          <div class="field">
+            <label for="rm-opens-at">Opens at</label>
+            <input type="time" id="rm-opens-at" />
+          </div>
+          <div class="field">
+            <label for="rm-closes-at">Closes at</label>
+            <input type="time" id="rm-closes-at" />
+          </div>
+        </div>
+        <div class="modal-result" id="rm-availability-result"></div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button type="button" class="btn btn-primary btn-sm" id="rm-availability-save">Save availability</button>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <div class="modal-result" id="restaurant-modal-result"></div>
+        <button type="button" class="btn btn-ghost" data-close-modal="restaurant-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="restaurant-modal-save">
+          <span id="restaurant-modal-save-text">Save changes</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add / Edit Category -->
+<div class="modal-overlay" id="category-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="category-modal-title">Add category</h3>
+      <button class="modal-close" data-close-modal="category-modal">✕</button>
+    </div>
+    <form id="category-form">
+      <div class="modal-body">
+        <input type="hidden" id="cat-id" />
+        <div class="field">
+          <label for="cat-name">Name</label>
+          <input type="text" id="cat-name" placeholder="Biryani" />
+          <div class="error-msg" data-error-for="cat-name"></div>
+        </div>
+        <div class="field">
+          <label>Category image</label>
+          <div class="img-upload" data-img-upload data-upload-type="categories" data-target-input="cat-image">
+            <div class="img-upload-preview" data-preview>
+              <span class="img-upload-empty" data-empty>No image yet</span>
+            </div>
+            <label class="btn btn-ghost btn-sm img-upload-btn">
+              <span data-btn-label>Upload image</span>
+              <input type="file" accept="image/*" data-file-input hidden />
+            </label>
+            <div class="img-upload-progress" data-progress-wrap style="display:none;">
+              <div class="img-upload-progress-fill" data-progress-fill></div>
+            </div>
+          </div>
+          <input type="hidden" id="cat-image" />
+          <div class="error-msg" data-error-for="cat-image"></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <div class="modal-result" id="category-modal-result"></div>
+        <button type="button" class="btn btn-ghost" data-close-modal="category-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="category-modal-save">
+          <span id="category-modal-save-text">Save category</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add / Edit Menu Item -->
+<div class="modal-overlay" id="menu-item-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="menu-item-modal-title">Add menu item</h3>
+      <button class="modal-close" data-close-modal="menu-item-modal">✕</button>
+    </div>
+    <form id="menu-item-form">
+      <div class="modal-body">
+        <input type="hidden" id="mi-id" />
+        <div class="form-grid">
+          <div class="field span-2">
+            <label for="mi-name">Item name *</label>
+            <input type="text" id="mi-name" placeholder="Chicken Biryani" />
+            <div class="error-msg" data-error-for="mi-name"></div>
+          </div>
+
+          <div class="field span-2">
+            <label for="mi-description">Description</label>
+            <input type="text" id="mi-description" placeholder="Slow-cooked basmati rice with tender chicken…" />
+          </div>
+
+          <div class="field">
+            <label for="mi-restaurant">Restaurant *</label>
+            <select id="mi-restaurant"></select>
+            <div class="error-msg" data-error-for="mi-restaurant"></div>
+          </div>
+          <div class="field">
+            <label for="mi-category">Category</label>
+            <input type="text" id="mi-category" placeholder="Main Course" />
+          </div>
+
+          <div class="field">
+            <label for="mi-price">Price (₹) *</label>
+            <input type="number" id="mi-price" min="0" placeholder="249" />
+            <div class="error-msg" data-error-for="mi-price"></div>
+          </div>
+          <div class="field">
+            <label for="mi-originalPrice">Original price (₹) <span style="text-transform:none;font-weight:400;">(optional)</span></label>
+            <input type="number" id="mi-originalPrice" min="0" placeholder="299" />
+          </div>
+
+          <div class="field span-2">
+            <label>Item image</label>
+            <div class="img-upload" data-img-upload data-upload-type="menu" data-target-input="mi-image">
+              <div class="img-upload-preview" data-preview>
+                <span class="img-upload-empty" data-empty>No image yet</span>
+              </div>
+              <label class="btn btn-ghost btn-sm img-upload-btn">
+                <span data-btn-label>Upload image</span>
+                <input type="file" accept="image/*" data-file-input hidden />
+              </label>
+              <div class="img-upload-progress" data-progress-wrap style="display:none;">
+                <div class="img-upload-progress-fill" data-progress-fill></div>
+              </div>
+            </div>
+            <input type="hidden" id="mi-image" />
+          </div>
+
+          <div class="field span-2">
+            <div class="checkbox-row">
+              <input type="checkbox" id="mi-isVeg" checked />
+              <label for="mi-isVeg" style="text-transform:none;font-weight:500;letter-spacing:0;">Vegetarian item</label>
+            </div>
+          </div>
+          <div class="field span-2">
+            <div class="checkbox-row">
+              <input type="checkbox" id="mi-inStock" checked />
+              <label for="mi-inStock" style="text-transform:none;font-weight:500;letter-spacing:0;">In stock / available</label>
+            </div>
+          </div>
+          <div class="field span-2">
+            <div class="checkbox-row">
+              <input type="checkbox" id="mi-isBestseller" />
+              <label for="mi-isBestseller" style="text-transform:none;font-weight:500;letter-spacing:0;">Mark as Best Seller</label>
+            </div>
+          </div>
+          <div class="field span-2">
+            <div class="checkbox-row">
+              <input type="checkbox" id="mi-isRecommended" />
+              <label for="mi-isRecommended" style="text-transform:none;font-weight:500;letter-spacing:0;">Mark as Recommended</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <div class="modal-result" id="menu-item-modal-result"></div>
+        <button type="button" class="btn btn-ghost" data-close-modal="menu-item-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="menu-item-modal-save">
+          <span id="menu-item-modal-save-text">Save item</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Cancel order (reason required) -->
+<div class="modal-overlay" id="cancel-order-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Cancel order</h3>
+      <button class="modal-close" data-close-modal="cancel-order-modal">✕</button>
+    </div>
+    <form id="cancel-order-form">
+      <div class="modal-body">
+        <input type="hidden" id="co-id" />
+        <div class="field">
+          <label for="co-reason">Cancellation reason</label>
+          <textarea id="co-reason" rows="3" placeholder="e.g. Restaurant unable to fulfill — out of stock"></textarea>
+          <div class="error-msg" data-error-for="co-reason"></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <div class="modal-result" id="cancel-order-modal-result"></div>
+        <button type="button" class="btn btn-ghost" data-close-modal="cancel-order-modal">Back</button>
+        <button type="submit" class="btn btn-danger" id="cancel-order-save">
+          <span id="cancel-order-save-text">Cancel order</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add / Edit Rider -->
+<div class="modal-overlay" id="rider-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="rider-modal-title">Add rider</h3>
+      <button class="modal-close" data-close-modal="rider-modal">✕</button>
+    </div>
+    <form id="rider-edit-form">
+      <div class="modal-body">
+        <input type="hidden" id="rd-id" />
+
+        <div class="field">
+          <label>Profile picture</label>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div id="rd-photo-preview" style="width:56px;height:56px;border-radius:50%;overflow:hidden;background:var(--border,#e5e7eb);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--text-faint,#9ca3af);flex-shrink:0;">—</div>
+            <label class="btn btn-ghost btn-sm">
+              <span>Choose photo</span>
+              <input type="file" accept="image/*" id="rd-photo-input" hidden />
+            </label>
+          </div>
+          <div class="hint">Optional. Uploaded when you save.</div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field span-2">
+            <label for="rd-name">Name *</label>
+            <input type="text" id="rd-name" placeholder="Rahul Kumar" />
+            <div class="error-msg" data-error-for="rd-name"></div>
+          </div>
+          <div class="field">
+            <label for="rd-email">Email *</label>
+            <input type="email" id="rd-email" placeholder="rider@example.com" />
+            <div class="error-msg" data-error-for="rd-email"></div>
+          </div>
+          <div class="field">
+            <label for="rd-phone">Phone *</label>
+            <input type="text" id="rd-phone" placeholder="+919876543210" />
+            <div class="error-msg" data-error-for="rd-phone"></div>
+          </div>
+          <div class="field span-2">
+            <label for="rd-password">Password <span style="text-transform:none;font-weight:400;" id="rd-password-hint">(min. 6 characters)</span></label>
+            <input type="password" id="rd-password" placeholder="Min. 6 characters" />
+            <div class="error-msg" data-error-for="rd-password"></div>
+          </div>
+          <div class="field">
+            <label for="rd-vehicleType">Vehicle type *</label>
+            <select id="rd-vehicleType">
+              <option value="">Select…</option>
+              <option value="bike">Bike</option>
+              <option value="scooter">Scooter</option>
+              <option value="bicycle">Bicycle</option>
+              <option value="car">Car</option>
+            </select>
+            <div class="error-msg" data-error-for="rd-vehicleType"></div>
+          </div>
+          <div class="field">
+            <label for="rd-vehicleNumber">Vehicle number *</label>
+            <input type="text" id="rd-vehicleNumber" placeholder="WB39AB1234" />
+            <div class="error-msg" data-error-for="rd-vehicleNumber"></div>
+          </div>
+          <div class="field span-2">
+            <label for="rd-deliveryZone">Delivery zone *</label>
+            <input type="text" id="rd-deliveryZone" placeholder="Maynaguri Town" />
+            <div class="error-msg" data-error-for="rd-deliveryZone"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <div class="modal-result" id="rider-modal-result"></div>
+        <button type="button" class="btn btn-ghost" data-close-modal="rider-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="rider-modal-save">
+          <span id="rider-modal-save-text">Create rider</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- View Rider Details -->
+<div class="modal-overlay" id="rider-detail-modal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Rider details</h3>
+      <button class="modal-close" data-close-modal="rider-detail-modal">✕</button>
+    </div>
+    <div class="modal-body" id="rider-detail-body"></div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-close-modal="rider-detail-modal">Close</button>
+    </div>
+  </div>
+</div>
+  
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="upload-widget.js"></script>
+<script src="app.js"></script>
+<script src="dashboard.js"></script>
+<script src="create-vendor.js"></script>
+<script src="modal.js"></script>
+<script src="manage-vendors.js"></script>
+<script src="manage-restaurants.js"></script>
+<script src="manage-orders.js"></script>
+<script src="manage-customers.js"></script>
+<script src="manage-categories.js"></script>
+<script src="manage-menu.js"></script>
+<script src="manage-riders.js"></script>
+</body>
+  </html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Login · Nearbite</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="layout.css" />
+</head>
+<body>
+
+<div class="login-screen">
+  <div class="login-card">
+    <div class="login-mark">
+      <div class="mark">N</div>
+      <div>
+        <span>Nearbite</span>
+        <small>Admin Panel</small>
+      </div>
+    </div>
+
+    <h1>Sign in</h1>
+    <p class="sub">Maynaguri ops console — admin access only.</p>
+
+    <div id="login-error" class="login-error"></div>
+
+    <form id="login-form" novalidate>
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="username" placeholder="you@nearbite.in" required />
+        <div class="error-msg" id="email-error"></div>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" placeholder="••••••••" required />
+        <div class="error-msg" id="password-error"></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="login-btn">
+        <span id="login-btn-text">Sign in</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script src="login.js"></script>
+</body>
+</html>
