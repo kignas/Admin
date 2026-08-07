@@ -11,13 +11,29 @@
     PLACED: 'muted', CONFIRMED: 'warning', PREPARING: 'warning',
     OUT_FOR_DELIVERY: 'warning', DELIVERED: 'success', CANCELLED: 'danger',
   };
-  // Forward statuses an admin can set directly. Cancellation has its own
-  // reason-required flow (PATCH /orders/:id/cancel) rather than living here.
+  
   const SETTABLE_STATUSES = ['placed', 'confirmed', 'preparing', 'out_for_delivery', 'delivered'];
   const TERMINAL = ['DELIVERED', 'CANCELLED'];
 
   const state = { page: 1, limit: 15, search: '', status: '' };
   let loadedOnce = false;
+  
+  // NEW: Store available riders for the manual assignment dropdown
+  let availableRiders = [];
+
+  // NEW: Fetch active riders so we can populate the dropdown
+  async function loadRiders() {
+    try {
+      // Assuming your admin routes have an endpoint to list riders
+      const res = await apiRequest('/admin/riders'); 
+      // Handle standard response shapes
+      availableRiders = Array.isArray(res.data) ? res.data : (res.data.riders || res.data.users || []);
+      // Filter to only show active riders
+      availableRiders = availableRiders.filter(r => r.isActive !== false);
+    } catch (err) {
+      console.error("Could not load riders for assignment dropdown", err);
+    }
+  }
 
   function renderTable(orders) {
     if (!orders.length) {
@@ -32,11 +48,23 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Order</th><th>Customer</th><th>Restaurant</th><th>Total</th><th>Status</th><th>Placed</th><th></th>
+            <th>Order</th>
+            <th>Customer</th>
+            <th>Restaurant</th>
+            <th>Total</th>
+            <th>Rider</th> <!-- NEW RIDER COLUMN -->
+            <th>Status</th>
+            <th>Placed</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          ${orders.map(o => `
+          ${orders.map(o => {
+            // Safely extract rider ID and Name if already assigned
+            const currentRiderId = o.rider ? (typeof o.rider === 'object' ? o.rider._id || o.rider.id : o.rider) : '';
+            const currentRiderName = o.rider && typeof o.rider === 'object' ? o.rider.name : 'Assigned';
+
+            return `
             <tr data-id="${o.id}">
               <td class="mono row-name">${escapeHtml(o.orderNumber)}</td>
               <td>
@@ -45,6 +73,21 @@
               </td>
               <td>${escapeHtml(o.restaurantName)}</td>
               <td class="mono">${formatMoney(o.totalAmount)}</td>
+              
+              <!-- NEW: Rider Assignment Dropdown -->
+              <td>
+                ${TERMINAL.includes(o.status)
+                  ? `<span class="badge badge-muted">${currentRiderId ? escapeHtml(currentRiderName) : 'Unassigned'}</span>`
+                  : `<select class="rider-select" data-id="${o.id}" data-current="${currentRiderId}">
+                      <option value="">Unassigned</option>
+                      ${availableRiders.map(r => `
+                        <option value="${r._id || r.id}" ${currentRiderId === (r._id || r.id) ? 'selected' : ''}>
+                          ${escapeHtml(r.name)}
+                        </option>
+                      `).join('')}
+                    </select>`}
+              </td>
+
               <td>
                 ${TERMINAL.includes(o.status)
                   ? `<span class="badge badge-${STATUS_BADGE[o.status] || 'muted'}">${o.status.replace(/_/g, ' ')}</span>`
@@ -63,7 +106,7 @@
                 </div>
               </td>
             </tr>
-          `).join('')}
+          `}).join('')}
         </tbody>
       </table>
     `;
@@ -71,6 +114,12 @@
     tableWrap.querySelectorAll('.status-select').forEach(sel => {
       sel.addEventListener('change', () => updateStatus(sel));
     });
+
+    // NEW: Listen for Rider Assignment changes
+    tableWrap.querySelectorAll('.rider-select').forEach(sel => {
+      sel.addEventListener('change', () => updateRider(sel));
+    });
+
     tableWrap.querySelectorAll('.order-cancel-btn').forEach(btn => {
       btn.addEventListener('click', () => openCancelModal(btn.dataset.id));
     });
@@ -107,6 +156,34 @@
     } catch (err) {
       sel.value = prev.toLowerCase();
       showToast(err.message || 'Could not update order status.', 'error');
+    } finally {
+      sel.disabled = false;
+    }
+  }
+
+  // NEW: Function to handle saving the Rider assignment to the backend
+  async function updateRider(sel) {
+    const newRiderId = sel.value;
+    const prev = sel.dataset.current;
+    
+    if (!newRiderId) {
+      showToast('Cannot unassign a rider directly. Assign to a new rider instead.', 'info');
+      sel.value = prev;
+      return;
+    }
+
+    sel.disabled = true;
+    try {
+      // Connects to the assignRider function we reviewed in orderController.js
+      await apiRequest(`/admin/orders/${sel.dataset.id}/assign`, { 
+        method: 'POST', // or PATCH depending on your specific route setup
+        body: { riderId: newRiderId } 
+      });
+      sel.dataset.current = newRiderId;
+      showToast('Rider assigned successfully.', 'success');
+    } catch (err) {
+      sel.value = prev;
+      showToast(err.message || 'Could not assign rider.', 'error');
     } finally {
       sel.disabled = false;
     }
@@ -175,9 +252,11 @@
     loadOrders();
   });
 
-  document.addEventListener('admin:view-changed', (e) => {
+  document.addEventListener('admin:view-changed', async (e) => {
     if (e.detail.view === 'manage-orders' && !loadedOnce) {
       loadedOnce = true;
+      // Load riders first, then load orders so the dropdowns have data
+      await loadRiders();
       loadOrders();
     }
   });
