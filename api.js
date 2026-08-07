@@ -4,8 +4,7 @@
    with its own key so the two sessions never collide in the same browser.
    ========================================================================== */
 
-// SECURITY FIX: Now pulling dynamically from your config.js file!
-const API_BASE = CONFIG.API_BASE_URL; 
+const API_BASE = 'https://eatswada.onrender.com/api';
 const TOKEN_KEY = 'nearbite_admin_token';
 const ADMIN_KEY = 'nearbite_admin_user';
 
