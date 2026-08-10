@@ -247,14 +247,22 @@
           <div class="form-section">
             <div class="form-section-title">Location &amp; type</div>
             <div class="form-grid">
+              <div class="field span-2">
+                <label>Restaurant location *</label>
+                <button type="button" class="btn btn-location" id="cv-capture-location">
+                  <span aria-hidden="true">📍</span> Use current GPS location
+                </button>
+                <div id="cv-location-status" class="location-status" aria-live="polite">Location not captured</div>
+                <div class="location-help">Stand at the restaurant or use the phone at the restaurant, then tap the button. This saves the real restaurant coordinates for distance calculations.</div>
+              </div>
               <div class="field">
                 <label for="cv-longitude">Longitude</label>
-                <input type="number" step="any" id="cv-longitude" placeholder="88.3832" />
+                <input type="number" step="any" id="cv-longitude" placeholder="Auto-filled from GPS" readonly />
                 <div class="error-msg" data-error-for="cv-longitude"></div>
               </div>
               <div class="field">
                 <label for="cv-latitude">Latitude</label>
-                <input type="number" step="any" id="cv-latitude" placeholder="26.5233" />
+                <input type="number" step="any" id="cv-latitude" placeholder="Auto-filled from GPS" readonly />
                 <div class="error-msg" data-error-for="cv-latitude"></div>
               </div>
               <div class="field span-2">
