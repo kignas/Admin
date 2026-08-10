@@ -63,14 +63,32 @@
 
     const lng = f('cv-longitude').value.trim();
     const lat = f('cv-latitude').value.trim();
+
     if (!lng || !lat) {
       setError('cv-longitude', 'Capture the restaurant GPS location first.');
       setError('cv-latitude', 'Capture the restaurant GPS location first.');
       ok = false;
     } else {
-      const lngNum = Number(lng), latNum = Number(lat);
-      if (!Number.isFinite(lngNum) || lngNum < -180 || lngNum > 180) { setError('cv-longitude', 'Invalid longitude.'); ok = false; }
-      if (!Number.isFinite(latNum) || latNum < -90 || latNum > 90) { setError('cv-latitude', 'Invalid latitude.'); ok = false; }
+      const lngNum = Number(lng);
+      const latNum = Number(lat);
+
+      if (!Number.isFinite(lngNum) || lngNum < -180 || lngNum > 180) {
+        setError('cv-longitude', 'Invalid longitude.');
+        ok = false;
+      }
+
+      if (!Number.isFinite(latNum) || latNum < -90 || latNum > 90) {
+        setError('cv-latitude', 'Invalid latitude.');
+        ok = false;
+      }
+
+      // Reject the old placeholder coordinates if they were typed/prefilled
+      // instead of captured from the device GPS button.
+      if (lng === '88.3832' && lat === '26.5233') {
+        setError('cv-longitude', 'Capture the real restaurant GPS location.');
+        setError('cv-latitude', 'Capture the real restaurant GPS location.');
+        ok = false;
+      }
     }
 
     return ok;
@@ -136,6 +154,12 @@
     captureLocationBtn.disabled = true;
     captureLocationBtn.classList.add('loading');
     setLocationStatus('Getting precise GPS location…');
+
+    // Clear stale coordinates before requesting a fresh restaurant location.
+    f('cv-latitude').value = '';
+    f('cv-longitude').value = '';
+    f('cv-latitude').classList.remove('invalid');
+    f('cv-longitude').classList.remove('invalid');
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
