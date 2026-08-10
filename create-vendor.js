@@ -5,6 +5,8 @@
   const submitBtn = document.getElementById('cv-submit-btn');
   const submitText = document.getElementById('cv-submit-text');
   const resultBox = document.getElementById('cv-result');
+  const captureLocationBtn = document.getElementById('cv-capture-location');
+  const locationStatus = document.getElementById('cv-location-status');
 
   const f = (id) => document.getElementById(id);
   let submitting = false;
@@ -61,13 +63,14 @@
 
     const lng = f('cv-longitude').value.trim();
     const lat = f('cv-latitude').value.trim();
-    if ((lng && !lat) || (!lng && lat)) {
-      setError(lng ? 'cv-latitude' : 'cv-longitude', 'Both longitude and latitude are required together.');
+    if (!lng || !lat) {
+      setError('cv-longitude', 'Capture the restaurant GPS location first.');
+      setError('cv-latitude', 'Capture the restaurant GPS location first.');
       ok = false;
-    } else if (lng && lat) {
+    } else {
       const lngNum = Number(lng), latNum = Number(lat);
-      if (lngNum < -180 || lngNum > 180) { setError('cv-longitude', 'Must be between -180 and 180.'); ok = false; }
-      if (latNum < -90 || latNum > 90) { setError('cv-latitude', 'Must be between -90 and 90.'); ok = false; }
+      if (!Number.isFinite(lngNum) || lngNum < -180 || lngNum > 180) { setError('cv-longitude', 'Invalid longitude.'); ok = false; }
+      if (!Number.isFinite(latNum) || latNum < -90 || latNum > 90) { setError('cv-latitude', 'Invalid latitude.'); ok = false; }
     }
 
     return ok;
@@ -111,6 +114,60 @@
       : 'Create vendor';
   }
 
+  function setLocationStatus(message, type = '') {
+    if (!locationStatus) return;
+    locationStatus.textContent = message;
+    locationStatus.className = `location-status ${type}`.trim();
+  }
+
+  async function captureRestaurantLocation() {
+    if (!navigator.geolocation) {
+      setLocationStatus('GPS is not supported on this device/browser.', 'error');
+      showToast('GPS is not supported on this device.', 'error');
+      return;
+    }
+
+    if (!window.isSecureContext) {
+      setLocationStatus('GPS requires a secure HTTPS page.', 'error');
+      showToast('Open the Admin page over HTTPS to use GPS.', 'error');
+      return;
+    }
+
+    captureLocationBtn.disabled = true;
+    captureLocationBtn.classList.add('loading');
+    setLocationStatus('Getting precise GPS location…');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+        f('cv-latitude').value = latitude.toFixed(6);
+        f('cv-longitude').value = longitude.toFixed(6);
+        setLocationStatus(`Location captured ✓ (±${Math.round(accuracy || 0)} m)`, 'success');
+        f('cv-latitude').classList.remove('invalid');
+        f('cv-longitude').classList.remove('invalid');
+        document.querySelectorAll('[data-error-for="cv-latitude"], [data-error-for="cv-longitude"]').forEach(el => el.textContent = '');
+        showToast('Restaurant GPS location captured.', 'success');
+        captureLocationBtn.disabled = false;
+        captureLocationBtn.classList.remove('loading');
+      },
+      (error) => {
+        const messages = {
+          1: 'Location permission was denied. Allow location access and try again.',
+          2: 'Your location could not be determined. Move to an open area and try again.',
+          3: 'GPS took too long. Try again with location services enabled.'
+        };
+        const message = messages[error.code] || 'Could not get your GPS location. Try again.';
+        setLocationStatus(message, 'error');
+        showToast(message, 'error');
+        captureLocationBtn.disabled = false;
+        captureLocationBtn.classList.remove('loading');
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+    );
+  }
+
+  if (captureLocationBtn) captureLocationBtn.addEventListener('click', captureRestaurantLocation);
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (submitting) return; // hard guard against duplicate submissions
@@ -142,6 +199,10 @@
   });
 
   form.addEventListener('reset', () => {
-    setTimeout(clearAllErrors, 0);
+    setTimeout(() => {
+      clearAllErrors();
+      setLocationStatus('Location not captured');
+      if (captureLocationBtn) { captureLocationBtn.disabled = false; captureLocationBtn.classList.remove('loading'); }
+    }, 0);
   });
 })();
