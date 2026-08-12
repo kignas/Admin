@@ -48,7 +48,7 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Order</th>
+            <th>Order / Shipment</th>
             <th>Customer</th>
             <th>Restaurant</th>
             <th>Total</th>
@@ -66,7 +66,10 @@
 
             return `
             <tr data-id="${o.id}">
-              <td class="mono row-name">${escapeHtml(o.orderNumber)}</td>
+              <td class="mono row-name">
+                <div>${escapeHtml(o.publicOrderId || o.orderNumber || o.id || '')}</div>
+                ${o.publicShipmentId || o.shipmentId ? `<div class="row-sub mono">Shipment: ${escapeHtml(o.publicShipmentId || o.shipmentId)}</div>` : ''}
+              </td>
               <td>
                 <div>${escapeHtml(o.customerName)}</div>
                 <div class="row-sub mono">${escapeHtml(o.customerPhone || '')}</div>
