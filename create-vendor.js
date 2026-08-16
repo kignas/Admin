@@ -50,8 +50,16 @@
     const cuisine = toArray(f('cv-cuisine').value);
     if (cuisine.length === 0) { setError('cv-cuisine', 'At least one cuisine is required.'); ok = false; }
 
-    const image = f('cv-image').value.trim();
-    if (image && !/^https?:\/\/.+/i.test(image)) { setError('cv-image', 'Must be a valid http(s) URL.'); ok = false; }
+    const imageValues = [1,2,3,4].map(i => f(`cv-image-${i}`).value.trim()).filter(Boolean);
+    imageValues.forEach((url, idx) => {
+      if (!/^https?:\/\/.+/i.test(url)) {
+        setError(`cv-image-${idx + 1}`, 'Must be a valid http(s) URL.');
+        ok = false;
+      }
+    });
+
+    const rating = Number(f('cv-rating').value);
+    if (!Number.isFinite(rating) || rating < 1 || rating > 5) { setError('cv-rating', 'Rating must be between 1 and 5.'); ok = false; }
 
     const min = f('cv-deliveryMin').value;
     const max = f('cv-deliveryMax').value;
@@ -59,6 +67,12 @@
     if (!max) { setError('cv-deliveryMax', 'Required.'); ok = false; }
     if (min && max && Number(min) > Number(max)) {
       setError('cv-deliveryMax', 'Must be ≥ min delivery time.'); ok = false;
+    }
+
+    const radius = Number(f('cv-deliveryRadiusKm').value || 15);
+    if (!Number.isFinite(radius) || radius <= 0 || radius > 100) {
+      setError('cv-deliveryRadiusKm', 'Enter a delivery radius between 0 and 100 km.');
+      ok = false;
     }
 
     const lng = f('cv-longitude').value.trim();
@@ -106,14 +120,19 @@
       restaurantName: f('cv-restaurantName').value.trim(),
       cuisine: toArray(f('cv-cuisine').value),
       address: f('cv-address').value.trim() || undefined,
-      image: f('cv-image').value.trim() || undefined,
+      image: f('cv-image-1').value.trim() || undefined,
+      images: [1,2,3,4].map(i => f(`cv-image-${i}`).value.trim()).filter(Boolean),
+      rating: Number(f('cv-rating').value),
+      ratingCount: f('cv-ratingCount').value ? Number(f('cv-ratingCount').value) : 0,
       categories: toArray(f('cv-categories').value),
       estimatedDeliveryMin: Number(f('cv-deliveryMin').value),
       estimatedDeliveryMax: Number(f('cv-deliveryMax').value),
       deliveryFee: f('cv-deliveryFee').value ? Number(f('cv-deliveryFee').value) : undefined,
+      freeDeliveryEnabled: f('cv-freeDeliveryEnabled').checked,
       platformFee: f('cv-platformFee').value ? Number(f('cv-platformFee').value) : undefined,
       minOrder: f('cv-minOrder').value ? Number(f('cv-minOrder').value) : undefined,
       freeDeliveryAbove: f('cv-freeDeliveryAbove').value ? Number(f('cv-freeDeliveryAbove').value) : undefined,
+      deliveryRadiusKm: f('cv-deliveryRadiusKm').value ? Number(f('cv-deliveryRadiusKm').value) : 15,
       isVeg: f('cv-isVeg').checked,
     };
 

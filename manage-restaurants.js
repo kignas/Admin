@@ -199,8 +199,17 @@
       document.getElementById('rm-cuisine').value = (r.cuisine || []).join(', ');
       document.getElementById('rm-deliveryFee').value = r.deliveryFee ?? '';
       document.getElementById('rm-platformFee').value = r.platformFee ?? '';
-      document.getElementById('rm-image').value = r.image || '';
-      document.getElementById('rm-image').dispatchEvent(new Event('change'));
+      document.getElementById('rm-rating').value = r.rating ?? '';
+      document.getElementById('rm-ratingCount').value = r.ratingCount ?? '';
+      document.getElementById('rm-freeDeliveryEnabled').checked = r.freeDeliveryEnabled !== false;
+      document.getElementById('rm-freeDeliveryAbove').value = r.freeDeliveryAbove ?? '';
+      document.getElementById('rm-deliveryRadiusKm').value = r.deliveryRadiusKm ?? 15;
+      const gallery = Array.isArray(r.images) && r.images.length ? r.images : (r.image ? [r.image] : []);
+      for (let i = 1; i <= 4; i++) {
+        const input = document.getElementById(`rm-image-${i}`);
+        input.value = gallery[i - 1] || '';
+        input.dispatchEvent(new Event('change'));
+      }
 
       const availabilityStatus = r.availabilityStatus || 'open';
       availabilityStatusSelect.value = availabilityStatus;
@@ -270,7 +279,8 @@
     if (saving) return;
 
     let valid = true;
-    setFieldError('rm-name', ''); setFieldError('rm-cuisine', ''); setFieldError('rm-image', '');
+    setFieldError('rm-name', ''); setFieldError('rm-cuisine', '');
+    for (let i = 1; i <= 4; i++) setFieldError(`rm-image-${i}`, '');
 
     const name = document.getElementById('rm-name').value.trim();
     if (!name) { setFieldError('rm-name', 'Name is required.'); valid = false; }
@@ -278,8 +288,18 @@
     const cuisine = document.getElementById('rm-cuisine').value.split(',').map(s => s.trim()).filter(Boolean);
     if (!cuisine.length) { setFieldError('rm-cuisine', 'At least one cuisine is required.'); valid = false; }
 
-    const image = document.getElementById('rm-image').value.trim();
-    if (image && !/^https?:\/\/.+/i.test(image)) { setFieldError('rm-image', 'Must be a valid http(s) URL.'); valid = false; }
+    const images = [1,2,3,4].map(i => document.getElementById(`rm-image-${i}`).value.trim()).filter(Boolean);
+    images.forEach((url, idx) => {
+      if (!/^https?:\/\/.+/i.test(url)) { setFieldError(`rm-image-${idx + 1}`, 'Must be a valid http(s) URL.'); valid = false; }
+    });
+    const rating = Number(document.getElementById('rm-rating').value);
+    if (!Number.isFinite(rating) || rating < 1 || rating > 5) { setFieldError('rm-rating', 'Rating must be between 1 and 5.'); valid = false; }
+
+    const deliveryRadiusKm = Number(document.getElementById('rm-deliveryRadiusKm').value || 15);
+    if (!Number.isFinite(deliveryRadiusKm) || deliveryRadiusKm <= 0 || deliveryRadiusKm > 100) {
+      showToast('Delivery radius must be between 0 and 100 km.', 'error');
+      valid = false;
+    }
 
     if (!valid) return;
 
@@ -292,7 +312,13 @@
         name,
         address: document.getElementById('rm-address').value.trim(),
         cuisine,
-        image,
+        image: images[0] || '',
+        images,
+        rating,
+        ratingCount: Number(document.getElementById('rm-ratingCount').value || 0),
+        freeDeliveryEnabled: document.getElementById('rm-freeDeliveryEnabled').checked,
+        freeDeliveryAbove: Number(document.getElementById('rm-freeDeliveryAbove').value || 0),
+        deliveryRadiusKm: Number(document.getElementById('rm-deliveryRadiusKm').value || 15),
       };
       const deliveryFee = document.getElementById('rm-deliveryFee').value;
       const platformFee = document.getElementById('rm-platformFee').value;

@@ -256,3 +256,17 @@ button, input, select, textarea {
 }
 .toast.success { border-left: 3px solid var(--success); }
 .toast.error   { border-left: 3px solid var(--danger); }
+
+
+/* Restaurant gallery uploads — keeps the existing admin layout but supports four photos. */
+.restaurant-image-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.restaurant-image-upload-grid .img-upload-preview {
+  min-height: 110px;
+}
+@media (max-width: 720px) {
+  .restaurant-image-upload-grid { grid-template-columns: 1fr; }
+}

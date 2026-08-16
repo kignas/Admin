@@ -193,21 +193,50 @@
               </div>
 
               <div class="field span-2">
-                <label>Restaurant image</label>
-                <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="cv-image">
-                  <div class="img-upload-preview" data-preview>
-                    <span class="img-upload-empty" data-empty>No image yet</span>
+                <label>Restaurant images (up to 4)</label>
+                <div class="restaurant-image-upload-grid">
+                  <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="cv-image-1">
+                    <div class="img-upload-preview" data-preview><span class="img-upload-empty" data-empty>Image 1 — cover</span></div>
+                    <label class="btn btn-ghost btn-sm img-upload-btn"><span data-btn-label>Upload image</span><input type="file" accept="image/*" data-file-input hidden /></label>
+                    <div class="img-upload-progress" data-progress-wrap style="display:none;"><div class="img-upload-progress-fill" data-progress-fill></div></div>
                   </div>
-                  <label class="btn btn-ghost btn-sm img-upload-btn">
-                    <span data-btn-label>Upload image</span>
-                    <input type="file" accept="image/*" data-file-input hidden />
-                  </label>
-                  <div class="img-upload-progress" data-progress-wrap style="display:none;">
-                    <div class="img-upload-progress-fill" data-progress-fill></div>
+                  <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="cv-image-2">
+                    <div class="img-upload-preview" data-preview><span class="img-upload-empty" data-empty>Image 2</span></div>
+                    <label class="btn btn-ghost btn-sm img-upload-btn"><span data-btn-label>Upload image</span><input type="file" accept="image/*" data-file-input hidden /></label>
+                    <div class="img-upload-progress" data-progress-wrap style="display:none;"><div class="img-upload-progress-fill" data-progress-fill></div></div>
+                  </div>
+                  <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="cv-image-3">
+                    <div class="img-upload-preview" data-preview><span class="img-upload-empty" data-empty>Image 3</span></div>
+                    <label class="btn btn-ghost btn-sm img-upload-btn"><span data-btn-label>Upload image</span><input type="file" accept="image/*" data-file-input hidden /></label>
+                    <div class="img-upload-progress" data-progress-wrap style="display:none;"><div class="img-upload-progress-fill" data-progress-fill></div></div>
+                  </div>
+                  <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="cv-image-4">
+                    <div class="img-upload-preview" data-preview><span class="img-upload-empty" data-empty>Image 4</span></div>
+                    <label class="btn btn-ghost btn-sm img-upload-btn"><span data-btn-label>Upload image</span><input type="file" accept="image/*" data-file-input hidden /></label>
+                    <div class="img-upload-progress" data-progress-wrap style="display:none;"><div class="img-upload-progress-fill" data-progress-fill></div></div>
                   </div>
                 </div>
-                <input type="hidden" id="cv-image" />
-                <div class="error-msg" data-error-for="cv-image"></div>
+                <input type="hidden" id="cv-image-1" /><input type="hidden" id="cv-image-2" /><input type="hidden" id="cv-image-3" /><input type="hidden" id="cv-image-4" />
+                <div class="hint">The first image is the cover image. Customers can swipe through all uploaded images.</div>
+                <div class="error-msg" data-error-for="cv-image-1"></div>
+                <div class="error-msg" data-error-for="cv-image-2"></div>
+                <div class="error-msg" data-error-for="cv-image-3"></div>
+                <div class="error-msg" data-error-for="cv-image-4"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Customer-facing rating</div>
+            <div class="form-grid">
+              <div class="field">
+                <label for="cv-rating">Rating (1–5) *</label>
+                <input type="number" id="cv-rating" min="1" max="5" step="0.1" value="4.0" />
+                <div class="error-msg" data-error-for="cv-rating"></div>
+              </div>
+              <div class="field">
+                <label for="cv-ratingCount">Rating count</label>
+                <input type="number" id="cv-ratingCount" min="0" step="1" value="0" placeholder="e.g. 1250" />
               </div>
             </div>
           </div>
@@ -228,6 +257,21 @@
               <div class="field">
                 <label for="cv-deliveryFee">Delivery fee (₹)</label>
                 <input type="number" id="cv-deliveryFee" min="0" placeholder="40" />
+              </div>
+              <div class="field">
+                <label for="cv-freeDeliveryAbove">Free delivery above (₹)</label>
+                <input type="number" id="cv-freeDeliveryAbove" min="0" placeholder="199" />
+              </div>
+              <div class="field">
+                <label for="cv-deliveryRadiusKm">Delivery radius (km)</label>
+                <input type="number" id="cv-deliveryRadiusKm" min="0" max="100" step="0.1" placeholder="15" />
+                <div class="error-msg" data-error-for="cv-deliveryRadiusKm"></div>
+              </div>
+              <div class="field">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                  <input type="checkbox" id="cv-freeDeliveryEnabled" checked />
+                  <span>Free delivery promotion enabled</span>
+                </label>
               </div>
               <div class="field">
                 <label for="cv-platformFee">Platform fee (₹)</label>
@@ -545,21 +589,63 @@
           </div>
         </div>
         <div class="field">
-          <label>Restaurant image</label>
-          <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="rm-image">
-            <div class="img-upload-preview" data-preview>
-              <span class="img-upload-empty" data-empty>No image yet</span>
+          <label>Restaurant images (up to 4)</label>
+          <div class="restaurant-image-upload-grid">
+            <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="rm-image-1">
+              <div class="img-upload-preview" data-preview><span class="img-upload-empty" data-empty>Image 1 — cover</span></div>
+              <label class="btn btn-ghost btn-sm img-upload-btn"><span data-btn-label>Upload image</span><input type="file" accept="image/*" data-file-input hidden /></label>
+              <div class="img-upload-progress" data-progress-wrap style="display:none;"><div class="img-upload-progress-fill" data-progress-fill></div></div>
             </div>
-            <label class="btn btn-ghost btn-sm img-upload-btn">
-              <span data-btn-label>Upload image</span>
-              <input type="file" accept="image/*" data-file-input hidden />
-            </label>
-            <div class="img-upload-progress" data-progress-wrap style="display:none;">
-              <div class="img-upload-progress-fill" data-progress-fill></div>
+            <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="rm-image-2">
+              <div class="img-upload-preview" data-preview><span class="img-upload-empty" data-empty>Image 2</span></div>
+              <label class="btn btn-ghost btn-sm img-upload-btn"><span data-btn-label>Upload image</span><input type="file" accept="image/*" data-file-input hidden /></label>
+              <div class="img-upload-progress" data-progress-wrap style="display:none;"><div class="img-upload-progress-fill" data-progress-fill></div></div>
+            </div>
+            <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="rm-image-3">
+              <div class="img-upload-preview" data-preview><span class="img-upload-empty" data-empty>Image 3</span></div>
+              <label class="btn btn-ghost btn-sm img-upload-btn"><span data-btn-label>Upload image</span><input type="file" accept="image/*" data-file-input hidden /></label>
+              <div class="img-upload-progress" data-progress-wrap style="display:none;"><div class="img-upload-progress-fill" data-progress-fill></div></div>
+            </div>
+            <div class="img-upload" data-img-upload data-upload-type="restaurants" data-target-input="rm-image-4">
+              <div class="img-upload-preview" data-preview><span class="img-upload-empty" data-empty>Image 4</span></div>
+              <label class="btn btn-ghost btn-sm img-upload-btn"><span data-btn-label>Upload image</span><input type="file" accept="image/*" data-file-input hidden /></label>
+              <div class="img-upload-progress" data-progress-wrap style="display:none;"><div class="img-upload-progress-fill" data-progress-fill></div></div>
             </div>
           </div>
-          <input type="hidden" id="rm-image" />
-          <div class="error-msg" data-error-for="rm-image"></div>
+          <input type="hidden" id="rm-image-1" /><input type="hidden" id="rm-image-2" /><input type="hidden" id="rm-image-3" /><input type="hidden" id="rm-image-4" />
+          <div class="hint">The first image is the cover image. Customers can swipe through all uploaded images.</div>
+          <div class="error-msg" data-error-for="rm-image-1"></div>
+          <div class="error-msg" data-error-for="rm-image-2"></div>
+          <div class="error-msg" data-error-for="rm-image-3"></div>
+          <div class="error-msg" data-error-for="rm-image-4"></div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="rm-rating">Rating (1–5)</label>
+            <input type="number" id="rm-rating" min="1" max="5" step="0.1" />
+            <div class="error-msg" data-error-for="rm-rating"></div>
+          </div>
+          <div class="field">
+            <label for="rm-ratingCount">Rating count</label>
+            <input type="number" id="rm-ratingCount" min="0" step="1" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="rm-freeDeliveryEnabled" />
+              <span>Free delivery promotion enabled</span>
+            </label>
+          </div>
+          <div class="field">
+            <label for="rm-freeDeliveryAbove">Free delivery above (₹)</label>
+            <input type="number" id="rm-freeDeliveryAbove" min="0" />
+          </div>
+          <div class="field">
+            <label for="rm-deliveryRadiusKm">Delivery radius (km)</label>
+            <input type="number" id="rm-deliveryRadiusKm" min="0" max="100" step="0.1" />
+          </div>
         </div>
 
         <hr style="border:none;border-top:1px solid var(--border,#e5e7eb);margin:20px 0;" />
