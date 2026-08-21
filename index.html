@@ -274,9 +274,13 @@
                 </label>
               </div>
               <div class="field">
-                <label for="cv-platformFee">Platform fee (₹)</label>
-                <input type="number" id="cv-platformFee" min="0" placeholder="5" />
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                  <input type="checkbox" id="cv-codEnabled" />
+                  <span>Allow Cash on Delivery (COD)</span>
+                </label>
+                <div class="field-help">If enabled, customers can choose COD. Online payment remains available.</div>
               </div>
+
               <div class="field">
                 <label for="cv-minOrder">Minimum order (₹)</label>
                 <input type="number" id="cv-minOrder" min="0" placeholder="0" />
@@ -583,10 +587,7 @@
             <label for="rm-deliveryFee">Delivery fee (₹)</label>
             <input type="number" id="rm-deliveryFee" min="0" />
           </div>
-          <div class="field">
-            <label for="rm-platformFee">Platform fee (₹)</label>
-            <input type="number" id="rm-platformFee" min="0" />
-          </div>
+
         </div>
         <div class="field">
           <label>Restaurant images (up to 4)</label>
@@ -637,6 +638,13 @@
               <input type="checkbox" id="rm-freeDeliveryEnabled" />
               <span>Free delivery promotion enabled</span>
             </label>
+          </div>
+          <div class="field">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="rm-codEnabled" />
+              <span>Allow Cash on Delivery (COD)</span>
+            </label>
+            <div class="field-help">If enabled, customers can choose COD. Online payment remains available.</div>
           </div>
           <div class="field">
             <label for="rm-freeDeliveryAbove">Free delivery above (₹)</label>

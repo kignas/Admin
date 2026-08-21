@@ -198,10 +198,10 @@
       document.getElementById('rm-address').value = r.address || '';
       document.getElementById('rm-cuisine').value = (r.cuisine || []).join(', ');
       document.getElementById('rm-deliveryFee').value = r.deliveryFee ?? '';
-      document.getElementById('rm-platformFee').value = r.platformFee ?? '';
       document.getElementById('rm-rating').value = r.rating ?? '';
       document.getElementById('rm-ratingCount').value = r.ratingCount ?? '';
       document.getElementById('rm-freeDeliveryEnabled').checked = r.freeDeliveryEnabled !== false;
+      document.getElementById('rm-codEnabled').checked = r.codEnabled === true;
       document.getElementById('rm-freeDeliveryAbove').value = r.freeDeliveryAbove ?? '';
       document.getElementById('rm-deliveryRadiusKm').value = r.deliveryRadiusKm ?? 15;
       const gallery = Array.isArray(r.images) && r.images.length ? r.images : (r.image ? [r.image] : []);
@@ -317,13 +317,12 @@
         rating,
         ratingCount: Number(document.getElementById('rm-ratingCount').value || 0),
         freeDeliveryEnabled: document.getElementById('rm-freeDeliveryEnabled').checked,
+        codEnabled: document.getElementById('rm-codEnabled').checked,
         freeDeliveryAbove: Number(document.getElementById('rm-freeDeliveryAbove').value || 0),
         deliveryRadiusKm: Number(document.getElementById('rm-deliveryRadiusKm').value || 15),
       };
       const deliveryFee = document.getElementById('rm-deliveryFee').value;
-      const platformFee = document.getElementById('rm-platformFee').value;
       if (deliveryFee !== '') body.deliveryFee = Number(deliveryFee);
-      if (platformFee !== '') body.platformFee = Number(platformFee);
 
       await apiRequest(`/restaurants/${document.getElementById('rm-id').value}`, { method: 'PUT', body });
       resultBox.textContent = 'Restaurant updated.';
