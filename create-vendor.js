@@ -129,7 +129,7 @@
       estimatedDeliveryMax: Number(f('cv-deliveryMax').value),
       deliveryFee: f('cv-deliveryFee').value ? Number(f('cv-deliveryFee').value) : undefined,
       freeDeliveryEnabled: f('cv-freeDeliveryEnabled').checked,
-      platformFee: f('cv-platformFee').value ? Number(f('cv-platformFee').value) : undefined,
+      codEnabled: f('cv-codEnabled').checked,
       minOrder: f('cv-minOrder').value ? Number(f('cv-minOrder').value) : undefined,
       freeDeliveryAbove: f('cv-freeDeliveryAbove').value ? Number(f('cv-freeDeliveryAbove').value) : undefined,
       deliveryRadiusKm: f('cv-deliveryRadiusKm').value ? Number(f('cv-deliveryRadiusKm').value) : 15,
