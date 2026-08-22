@@ -20,7 +20,7 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Restaurant</th><th>Owner</th><th>Cuisine</th><th>Rating</th><th>Orders</th><th>Status</th><th></th>
+            <th>Restaurant</th><th>Priority</th><th>Owner</th><th>Cuisine</th><th>Rating</th><th>Orders</th><th>Status</th><th></th>
           </tr>
         </thead>
         <tbody>
@@ -30,6 +30,7 @@
                 <div class="row-name">${escapeHtml(r.name)}</div>
                 <div class="row-sub">${escapeHtml(r.address || '—')}</div>
               </td>
+              <td><div class="mono">${r.displayPriority ?? 0}</div>${r.isFeatured ? '<div class="row-sub">★ Featured</div>' : ''}</td>
               <td>
                 <div>${escapeHtml(r.ownerName || '—')}</div>
                 <div class="row-sub mono">${escapeHtml(r.phone || '')}</div>
@@ -200,6 +201,8 @@
       document.getElementById('rm-deliveryFee').value = r.deliveryFee ?? '';
       document.getElementById('rm-rating').value = r.rating ?? '';
       document.getElementById('rm-ratingCount').value = r.ratingCount ?? '';
+      document.getElementById('rm-displayPriority').value = r.displayPriority ?? 0;
+      document.getElementById('rm-isFeatured').checked = r.isFeatured === true;
       document.getElementById('rm-freeDeliveryEnabled').checked = r.freeDeliveryEnabled !== false;
       document.getElementById('rm-codEnabled').checked = r.codEnabled === true;
       document.getElementById('rm-freeDeliveryAbove').value = r.freeDeliveryAbove ?? '';
@@ -316,6 +319,8 @@
         images,
         rating,
         ratingCount: Number(document.getElementById('rm-ratingCount').value || 0),
+        displayPriority: Number(document.getElementById('rm-displayPriority').value || 0),
+        isFeatured: document.getElementById('rm-isFeatured').checked,
         freeDeliveryEnabled: document.getElementById('rm-freeDeliveryEnabled').checked,
         codEnabled: document.getElementById('rm-codEnabled').checked,
         freeDeliveryAbove: Number(document.getElementById('rm-freeDeliveryAbove').value || 0),

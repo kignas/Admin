@@ -54,7 +54,8 @@
         </button>
       </li>
       <li>
-        <button class="nav-item" data-view="manage-menu">
+        <button class="nav-item" data-view="manage-reviews"><span class="nav-icon">★</span><span>Manage Reviews</span></button>
+                    <button class="nav-item" data-view="manage-menu">
           <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v18M4 3h11l-2 4 2 4H4"/><path d="M17 3v18"/><path d="M20 3v6a2 2 0 0 1-2 2"/><path d="M20 3v18"/></svg></span>
           Manage Menu
         </button>
@@ -242,6 +243,14 @@
           </div>
 
           <div class="form-section">
+            <div class="form-section-title">Homepage placement</div>
+            <div class="form-grid">
+              <div class="field"><label for="cv-displayPriority">Display priority</label><input type="number" id="cv-displayPriority" min="0" max="100000" value="0" /><div class="field-help">Higher numbers appear earlier on the customer homepage.</div></div>
+              <div class="field"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="cv-isFeatured" /><span>Feature this restaurant</span></label><div class="field-help">Featured restaurants are shown before normal restaurants.</div></div>
+            </div>
+          </div>
+
+          <div class="form-section">
             <div class="form-section-title">Delivery &amp; pricing</div>
             <div class="form-grid">
               <div class="field">
@@ -375,6 +384,14 @@
           <div class="table-wrap" id="restaurants-table-wrap">
             <div class="state-block"><div class="spinner-lg"></div></div>
           </div>
+        </div>
+      </section>
+
+      <!-- ── Manage Reviews ─────────────────────────────────────── -->
+      <section class="view" id="view-manage-reviews">
+        <div class="card mgmt-card">
+          <div class="toolbar"><div class="sub" style="margin:0;">Moderate verified customer reviews.</div><button class="btn btn-ghost btn-sm" id="reviews-refresh-btn">↻ Refresh</button></div>
+          <div class="table-wrap" id="reviews-admin-wrap"><div class="state-block"><div class="spinner-lg"></div></div></div>
         </div>
       </section>
 
@@ -589,6 +606,11 @@
           </div>
 
         </div>
+        <div class="field-row">
+          <div class="field"><label for="rm-displayPriority">Display priority</label><input type="number" id="rm-displayPriority" min="0" max="100000" /><div class="field-help">Higher numbers appear earlier on the customer homepage.</div></div>
+          <div class="field"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="rm-isFeatured" /><span>Feature this restaurant</span></label></div>
+        </div>
+
         <div class="field">
           <label>Restaurant images (up to 4)</label>
           <div class="restaurant-image-upload-grid">
@@ -973,6 +995,7 @@
 <script src="modal.js"></script>
 <script src="manage-vendors.js"></script>
 <script src="manage-restaurants.js"></script>
+<script src="manage-reviews.js"></script>
 <script src="manage-orders.js"></script>
 <script src="manage-customers.js"></script>
 <script src="manage-categories.js"></script>
