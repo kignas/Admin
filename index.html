@@ -245,8 +245,11 @@
           <div class="form-section">
             <div class="form-section-title">Homepage placement</div>
             <div class="form-grid">
-              <div class="field"><label for="cv-displayPriority">Display priority</label><input type="number" id="cv-displayPriority" min="0" max="100000" value="0" /><div class="field-help">Higher numbers appear earlier on the customer homepage.</div></div>
-              <div class="field"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="cv-isFeatured" /><span>Feature this restaurant</span></label><div class="field-help">Featured restaurants are shown before normal restaurants.</div></div>
+              <div class="field"><label for="cv-homeOrder">Homepage position</label><input type="number" id="cv-homeOrder" min="1" max="999999" placeholder="1 = first" /><div class="field-help">Optional fixed position: 1 = first, 2 = second, 3 = third. Leave empty for automatic ordering.</div></div>
+              <div class="field"><label for="cv-displayPriority">Display priority</label><input type="number" id="cv-displayPriority" min="0" max="100000" value="0" /><div class="field-help">Used as a secondary ranking when homepage positions are tied.</div></div>
+              <div class="field"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="cv-isFeatured" /><span>Feature this restaurant</span></label><div class="field-help">Featured restaurants are shown before normal restaurants when no fixed position is set.</div></div>
+              <div class="field"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="cv-isBestSeller" /><span>Best Seller</span></label><div class="field-help">Shows the customer-facing Best Seller tag on this restaurant card.</div></div>
+              <div class="field"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="cv-isNearFast" /><span>Near &amp; Fast</span></label><div class="field-help">Shows the customer-facing Near &amp; Fast badge on this restaurant card.</div></div>
             </div>
           </div>
 
@@ -607,8 +610,11 @@
 
         </div>
         <div class="field-row">
-          <div class="field"><label for="rm-displayPriority">Display priority</label><input type="number" id="rm-displayPriority" min="0" max="100000" /><div class="field-help">Higher numbers appear earlier on the customer homepage.</div></div>
+          <div class="field"><label for="rm-homeOrder">Homepage position</label><input type="number" id="rm-homeOrder" min="1" max="999999" placeholder="1 = first" /><div class="field-help">Optional fixed position: 1 = first, 2 = second, 3 = third. Leave empty for automatic ordering.</div></div>
+          <div class="field"><label for="rm-displayPriority">Display priority</label><input type="number" id="rm-displayPriority" min="0" max="100000" /><div class="field-help">Secondary ranking when positions are tied or unset.</div></div>
           <div class="field"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="rm-isFeatured" /><span>Feature this restaurant</span></label></div>
+          <div class="field"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="rm-isBestSeller" /><span>Best Seller</span></label><div class="field-help">Show Best Seller on the customer card.</div></div>
+          <div class="field"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="rm-isNearFast" /><span>Near &amp; Fast</span></label><div class="field-help">Show Near &amp; Fast on the customer card.</div></div>
         </div>
 
         <div class="field">

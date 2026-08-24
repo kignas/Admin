@@ -20,7 +20,7 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Restaurant</th><th>Priority</th><th>Owner</th><th>Cuisine</th><th>Rating</th><th>Orders</th><th>Status</th><th></th>
+            <th>Restaurant</th><th>Homepage</th><th>Owner</th><th>Cuisine</th><th>Rating</th><th>Orders</th><th>Status</th><th></th>
           </tr>
         </thead>
         <tbody>
@@ -30,7 +30,10 @@
                 <div class="row-name">${escapeHtml(r.name)}</div>
                 <div class="row-sub">${escapeHtml(r.address || '—')}</div>
               </td>
-              <td><div class="mono">${r.displayPriority ?? 0}</div>${r.isFeatured ? '<div class="row-sub">★ Featured</div>' : ''}</td>
+              <td>
+                <div class="mono">${r.homeOrder && r.homeOrder < 999999 ? '#' + r.homeOrder : 'Auto'}</div>
+                <div class="row-sub">${r.isBestSeller ? '★ Best Seller' : ''}${r.isBestSeller && r.isNearFast ? ' · ' : ''}${r.isNearFast ? '⚡ Near & Fast' : ''}</div>
+              </td>
               <td>
                 <div>${escapeHtml(r.ownerName || '—')}</div>
                 <div class="row-sub mono">${escapeHtml(r.phone || '')}</div>
@@ -201,8 +204,11 @@
       document.getElementById('rm-deliveryFee').value = r.deliveryFee ?? '';
       document.getElementById('rm-rating').value = r.rating ?? '';
       document.getElementById('rm-ratingCount').value = r.ratingCount ?? '';
+      document.getElementById('rm-homeOrder').value = (r.homeOrder && r.homeOrder < 999999) ? r.homeOrder : '';
       document.getElementById('rm-displayPriority').value = r.displayPriority ?? 0;
       document.getElementById('rm-isFeatured').checked = r.isFeatured === true;
+      document.getElementById('rm-isBestSeller').checked = r.isBestSeller === true;
+      document.getElementById('rm-isNearFast').checked = r.isNearFast === true;
       document.getElementById('rm-freeDeliveryEnabled').checked = r.freeDeliveryEnabled !== false;
       document.getElementById('rm-codEnabled').checked = r.codEnabled === true;
       document.getElementById('rm-freeDeliveryAbove').value = r.freeDeliveryAbove ?? '';
@@ -298,6 +304,15 @@
     const rating = Number(document.getElementById('rm-rating').value);
     if (!Number.isFinite(rating) || rating < 1 || rating > 5) { setFieldError('rm-rating', 'Rating must be between 1 and 5.'); valid = false; }
 
+    const homeOrderRaw = document.getElementById('rm-homeOrder').value.trim();
+    if (homeOrderRaw !== '') {
+      const homeOrder = Number(homeOrderRaw);
+      if (!Number.isInteger(homeOrder) || homeOrder < 1 || homeOrder > 999999) {
+        showToast('Homepage position must be a whole number from 1 to 999999.', 'error');
+        valid = false;
+      }
+    }
+
     const deliveryRadiusKm = Number(document.getElementById('rm-deliveryRadiusKm').value || 15);
     if (!Number.isFinite(deliveryRadiusKm) || deliveryRadiusKm <= 0 || deliveryRadiusKm > 100) {
       showToast('Delivery radius must be between 0 and 100 km.', 'error');
@@ -319,8 +334,11 @@
         images,
         rating,
         ratingCount: Number(document.getElementById('rm-ratingCount').value || 0),
+        homeOrder: document.getElementById('rm-homeOrder').value ? Number(document.getElementById('rm-homeOrder').value) : 999999,
         displayPriority: Number(document.getElementById('rm-displayPriority').value || 0),
         isFeatured: document.getElementById('rm-isFeatured').checked,
+        isBestSeller: document.getElementById('rm-isBestSeller').checked,
+        isNearFast: document.getElementById('rm-isNearFast').checked,
         freeDeliveryEnabled: document.getElementById('rm-freeDeliveryEnabled').checked,
         codEnabled: document.getElementById('rm-codEnabled').checked,
         freeDeliveryAbove: Number(document.getElementById('rm-freeDeliveryAbove').value || 0),
