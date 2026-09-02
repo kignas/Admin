@@ -146,6 +146,53 @@
   const resultBox = document.getElementById('restaurant-modal-result');
   let saving = false;
 
+  const HOURS_DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+
+  function getWeeklyHours(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return undefined;
+    const hours = {};
+    HOURS_DAYS.forEach(day => {
+      const row = container.querySelector(`[data-hours-day=\"${day}\"]`);
+      if (!row) return;
+      hours[day] = {
+        closed: !!row.querySelector('[data-closed]')?.checked,
+        opensAt: row.querySelector('[data-opens]')?.value || '10:00',
+        closesAt: row.querySelector('[data-closes]')?.value || '22:00',
+      };
+    });
+    return hours;
+  }
+
+  function setWeeklyHours(containerId, value) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    HOURS_DAYS.forEach(day => {
+      const row = container.querySelector(`[data-hours-day=\"${day}\"]`);
+      if (!row) return;
+      const data = value?.[day] || {};
+      const closed = row.querySelector('[data-closed]');
+      const opens = row.querySelector('[data-opens]');
+      const closes = row.querySelector('[data-closes]');
+      if (closed) closed.checked = data.closed === true;
+      if (opens) opens.value = data.opensAt || '10:00';
+      if (closes) closes.value = data.closesAt || '22:00';
+      [opens, closes].forEach(input => { if (input) input.disabled = !!closed?.checked; });
+    });
+  }
+
+  function bindWeeklyHours(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.querySelectorAll('[data-hours-day]').forEach(row => {
+      const closed = row.querySelector('[data-closed]');
+      const inputs = row.querySelectorAll('[data-opens], [data-closes]');
+      closed?.addEventListener('change', () => {
+        inputs.forEach(input => { input.disabled = closed.checked; });
+      });
+    });
+  }
+
   function setFieldError(id, msg) {
     const el = document.querySelector(`[data-error-for="${id}"]`);
     const input = document.getElementById(id);
@@ -200,6 +247,8 @@
       const r = res.data;
       document.getElementById('rm-name').value = r.name || '';
       document.getElementById('rm-address').value = r.address || '';
+      document.getElementById('rm-phone').value = r.phone || '';
+      document.getElementById('rm-description').value = r.description || '';
       document.getElementById('rm-cuisine').value = (r.cuisine || []).join(', ');
       document.getElementById('rm-deliveryFee').value = r.deliveryFee ?? '';
       document.getElementById('rm-rating').value = r.rating ?? '';
@@ -227,6 +276,7 @@
       closesAtInput.value = r.closesAt || '';
       renderAvailabilityBadge(availabilityStatus);
       updateHoursRowState();
+      setWeeklyHours('rm-weekly-hours', r.openingHours);
     } catch (err) {
       resultBox.textContent = err.message || 'Could not load restaurant details.';
       resultBox.className = 'modal-result show error';
@@ -282,6 +332,7 @@
     }
   }
   availabilitySaveBtn.addEventListener('click', saveAvailability);
+  bindWeeklyHours('rm-weekly-hours');
 
   editForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -329,6 +380,9 @@
       const body = {
         name,
         address: document.getElementById('rm-address').value.trim(),
+        phone: document.getElementById('rm-phone').value.trim(),
+        description: document.getElementById('rm-description').value.trim(),
+        openingHours: getWeeklyHours('rm-weekly-hours'),
         cuisine,
         image: images[0] || '',
         images,

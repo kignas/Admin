@@ -193,6 +193,28 @@
                 <input type="text" id="cv-address" placeholder="Main Road, Maynaguri" />
               </div>
 
+              <div class="field">
+                <label for="cv-phone">Restaurant phone</label>
+                <input type="text" id="cv-phone" maxlength="30" placeholder="+919876543210" />
+              </div>
+              <div class="field">
+                <label for="cv-description">Description</label>
+                <textarea id="cv-description" rows="3" maxlength="1000" placeholder="Short restaurant description"></textarea>
+              </div>
+              <div class="field span-2">
+                <label>Weekly opening hours</label>
+                <div id="cv-weekly-hours" style="display:grid;gap:10px;">
+                  <div class="field-row" data-hours-day="monday"><div class="field"><label>Monday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+                  <div class="field-row" data-hours-day="tuesday"><div class="field"><label>Tuesday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+                  <div class="field-row" data-hours-day="wednesday"><div class="field"><label>Wednesday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+                  <div class="field-row" data-hours-day="thursday"><div class="field"><label>Thursday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+                  <div class="field-row" data-hours-day="friday"><div class="field"><label>Friday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+                  <div class="field-row" data-hours-day="saturday"><div class="field"><label>Saturday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+                  <div class="field-row" data-hours-day="sunday"><div class="field"><label>Sunday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+                </div>
+                <div class="hint">Default hours are 10:00–22:00. Mark a day closed when needed.</div>
+              </div>
+
               <div class="field span-2">
                 <label>Restaurant images (up to 4)</label>
                 <div class="restaurant-image-upload-grid">
@@ -598,6 +620,15 @@
           <input type="text" id="rm-address" />
         </div>
         <div class="field">
+          <label for="rm-phone">Restaurant phone</label>
+          <input type="text" id="rm-phone" placeholder="+919876543210" maxlength="30" />
+        </div>
+        <div class="field">
+          <label for="rm-description">Description</label>
+          <textarea id="rm-description" rows="4" maxlength="1000" placeholder="Short description shown on the restaurant details page"></textarea>
+          <div class="hint">Up to 1000 characters.</div>
+        </div>
+        <div class="field">
           <label for="rm-cuisine">Cuisine</label>
           <input type="text" id="rm-cuisine" placeholder="Comma-separated" />
           <div class="error-msg" data-error-for="rm-cuisine"></div>
@@ -716,6 +747,20 @@
             <label for="rm-closes-at">Closes at</label>
             <input type="time" id="rm-closes-at" />
           </div>
+        </div>
+
+        <div class="field">
+          <label>Weekly opening hours</label>
+          <div id="rm-weekly-hours" style="display:grid;gap:10px;">
+            <div class="field-row" data-hours-day="monday"><div class="field"><label>Monday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+            <div class="field-row" data-hours-day="tuesday"><div class="field"><label>Tuesday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+            <div class="field-row" data-hours-day="wednesday"><div class="field"><label>Wednesday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+            <div class="field-row" data-hours-day="thursday"><div class="field"><label>Thursday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+            <div class="field-row" data-hours-day="friday"><div class="field"><label>Friday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+            <div class="field-row" data-hours-day="saturday"><div class="field"><label>Saturday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+            <div class="field-row" data-hours-day="sunday"><div class="field"><label>Sunday</label><label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" data-closed /> Closed</label></div><div class="field"><label>Opens</label><input type="time" data-opens value="10:00" /></div><div class="field"><label>Closes</label><input type="time" data-closes value="22:00" /></div></div>
+          </div>
+          <div class="hint">These hours are shown on the customer restaurant details page. Auto Hours can still control today's availability separately.</div>
         </div>
         <div class="modal-result" id="rm-availability-result"></div>
         <div style="display:flex;justify-content:flex-end;">

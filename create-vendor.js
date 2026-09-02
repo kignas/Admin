@@ -29,6 +29,34 @@
     return raw.split(',').map(s => s.trim()).filter(Boolean);
   }
 
+  const HOURS_DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+
+  function getWeeklyHours() {
+    const container = f('cv-weekly-hours');
+    if (!container) return undefined;
+    const hours = {};
+    HOURS_DAYS.forEach(day => {
+      const row = container.querySelector(`[data-hours-day=\"${day}\"]`);
+      if (!row) return;
+      hours[day] = {
+        closed: !!row.querySelector('[data-closed]')?.checked,
+        opensAt: row.querySelector('[data-opens]')?.value || '10:00',
+        closesAt: row.querySelector('[data-closes]')?.value || '22:00',
+      };
+    });
+    return hours;
+  }
+
+  function bindWeeklyHours() {
+    const container = f('cv-weekly-hours');
+    if (!container) return;
+    container.querySelectorAll('[data-hours-day]').forEach(row => {
+      const closed = row.querySelector('[data-closed]');
+      const inputs = row.querySelectorAll('[data-opens], [data-closes]');
+      closed?.addEventListener('change', () => inputs.forEach(input => input.disabled = closed.checked));
+    });
+  }
+
   function validate() {
     let ok = true;
 
@@ -120,6 +148,9 @@
       restaurantName: f('cv-restaurantName').value.trim(),
       cuisine: toArray(f('cv-cuisine').value),
       address: f('cv-address').value.trim() || undefined,
+      phone: f('cv-phone')?.value.trim() || undefined,
+      description: f('cv-description')?.value.trim() || undefined,
+      openingHours: getWeeklyHours(),
       image: f('cv-image-1').value.trim() || undefined,
       images: [1,2,3,4].map(i => f(`cv-image-${i}`).value.trim()).filter(Boolean),
       rating: Number(f('cv-rating').value),
@@ -215,6 +246,7 @@
   }
 
   if (captureLocationBtn) captureLocationBtn.addEventListener('click', captureRestaurantLocation);
+  bindWeeklyHours();
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
