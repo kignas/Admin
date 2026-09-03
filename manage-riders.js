@@ -42,11 +42,25 @@
   const state = { page: 1, limit: 10, search: '', online: '', status: '' };
   let currentRiders = [];
 
+  // Every other field in this panel is escaped; avatar was the exception, and
+  // it goes straight into a src="" attribute. Today only Cloudinary URLs land
+  // there, but the field is not inherently trustworthy and this file renders
+  // rider-controlled data inside the admin's browser — exactly the direction
+  // an escalation would travel.
+  function safeImageUrl(value) {
+    if (!value) return '';
+    try {
+      const u = new URL(String(value), location.href);
+      return (u.protocol === 'https:' || u.protocol === 'http:') ? u.href : '';
+    } catch (_) { return ''; }
+  }
+
   function avatarCell(r) {
-    if (r.avatar) {
-      return `<img src="${r.avatar}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;" />`;
+    const src = safeImageUrl(r.avatar);
+    if (src) {
+      return `<img src="${escapeHtml(src)}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;" />`;
     }
-    return `<div class="avatar" style="width:36px;height:36px;font-size:13px;flex-shrink:0;">${initials(r.name)}</div>`;
+    return `<div class="avatar" style="width:36px;height:36px;font-size:13px;flex-shrink:0;">${escapeHtml(initials(r.name))}</div>`;
   }
 
   function renderTable(riders) {
@@ -190,9 +204,9 @@
     const rd = rider.riderDetails || {};
     detailBody.innerHTML = `
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
-        ${rider.avatar
-          ? `<img src="${rider.avatar}" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;" />`
-          : `<div class="avatar" style="width:64px;height:64px;font-size:20px;">${initials(rider.name)}</div>`}
+        ${safeImageUrl(rider.avatar)
+          ? `<img src="${escapeHtml(safeImageUrl(rider.avatar))}" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;" />`
+          : `<div class="avatar" style="width:64px;height:64px;font-size:20px;">${escapeHtml(initials(rider.name))}</div>`}
         <div>
           <div class="row-name" style="font-size:16px;">${escapeHtml(rider.name)}</div>
           <span class="badge ${rider.isActive ? 'badge-success' : 'badge-muted'}">${rider.isActive ? 'Active' : 'Disabled'}</span>
@@ -251,8 +265,8 @@
     document.getElementById('rd-id').value = '';
     titleEl.textContent = 'Add rider';
     saveText.textContent = 'Create rider';
-    passwordHint.textContent = '(min. 6 characters)';
-    document.getElementById('rd-password').placeholder = 'Min. 6 characters';
+    passwordHint.textContent = '(min. 10 characters)';
+    document.getElementById('rd-password').placeholder = 'Min. 10 characters';
     photoInput.value = '';
     selectedPhotoFile = null;
     photoPreview.innerHTML = '—';
@@ -279,8 +293,8 @@
     document.getElementById('rd-deliveryZone').value = rd.deliveryZone || '';
     selectedPhotoFile = null;
     photoInput.value = '';
-    photoPreview.innerHTML = rider.avatar
-      ? `<img src="${rider.avatar}" alt="" style="width:100%;height:100%;object-fit:cover;" />`
+    photoPreview.innerHTML = safeImageUrl(rider.avatar)
+      ? `<img src="${escapeHtml(safeImageUrl(rider.avatar))}" alt="" style="width:100%;height:100%;object-fit:cover;" />`
       : initials(rider.name);
     openModal('rider-modal');
   }
@@ -307,10 +321,10 @@
     if (!phone || !/^\+?[1-9]\d{9,14}$/.test(phone)) { setFieldError('rd-phone', 'Enter a valid phone number.'); valid = false; }
 
     const password = document.getElementById('rd-password').value;
-    if (isCreate && (!password || password.length < 6)) {
-      setFieldError('rd-password', 'At least 6 characters.'); valid = false;
-    } else if (password && password.length < 6) {
-      setFieldError('rd-password', 'At least 6 characters.'); valid = false;
+    if (isCreate && (!password || password.length < 10)) {
+      setFieldError('rd-password', 'At least 10 characters.'); valid = false;
+    } else if (password && password.length < 10) {
+      setFieldError('rd-password', 'At least 10 characters.'); valid = false;
     }
 
     const vehicleType = document.getElementById('rd-vehicleType').value;

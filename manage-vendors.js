@@ -147,7 +147,7 @@
     if (!phone || !/^\+?[1-9]\d{9,14}$/.test(phone)) { setFieldError('vm-phone', 'Enter a valid phone number.'); valid = false; }
 
     const password = document.getElementById('vm-password').value;
-    if (password && password.length < 6) { setFieldError('vm-password', 'At least 6 characters.'); valid = false; }
+    if (password && password.length < 10) { setFieldError('vm-password', 'At least 10 characters.'); valid = false; }
 
     if (!valid) return;
 

@@ -79,7 +79,7 @@
               
               <!-- NEW: Rider Assignment Dropdown -->
               <td>
-                ${TERMINAL.includes(o.status)
+                ${TERMINAL.includes(o.status) || o.status !== 'WAITING_FOR_RIDER'
                   ? `<span class="badge badge-muted">${currentRiderId ? escapeHtml(currentRiderName) : 'Unassigned'}</span>`
                   : `<select class="rider-select" data-id="${o.id}" data-current="${currentRiderId}">
                       <option value="">Unassigned</option>
@@ -177,10 +177,14 @@
 
     sel.disabled = true;
     try {
-      // Connects to the assignRider function we reviewed in orderController.js
-      await apiRequest(`/admin/orders/${sel.dataset.id}/assign`, { 
-        method: 'POST', // or PATCH depending on your specific route setup
-        body: { riderId: newRiderId } 
+      // Correct route. /admin/orders/:id/assign never existed in adminRoutes.js,
+      // so every manual assignment used to come back 404 "Route not found" —
+      // auto-assignment covered it up. The real endpoint is on orderRoutes.js
+      // and it is a PUT. It only accepts orders in `waiting_for_rider`; the
+      // dropdown is disabled at every other status (see renderTable).
+      await apiRequest(`/orders/${sel.dataset.id}/assign-rider`, {
+        method: 'PUT',
+        body: { riderId: newRiderId },
       });
       sel.dataset.current = newRiderId;
       showToast('Rider assigned successfully.', 'success');
