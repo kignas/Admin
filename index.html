@@ -55,6 +55,9 @@
       </li>
       <li>
         <button class="nav-item" data-view="manage-reviews"><span class="nav-icon">★</span><span>Manage Reviews</span></button>
+      <li>
+        <button class="nav-item" data-view="platform-ratings"><span class="nav-icon">★</span><span>Rate Us Feedback</span></button>
+      </li>
                     <button class="nav-item" data-view="manage-menu">
           <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v18M4 3h11l-2 4 2 4H4"/><path d="M17 3v18"/><path d="M20 3v6a2 2 0 0 1-2 2"/><path d="M20 3v18"/></svg></span>
           Manage Menu
@@ -413,6 +416,20 @@
       </section>
 
       <!-- ── Manage Reviews ─────────────────────────────────────── -->
+
+      <!-- ── Rate Us Feedback ───────────────────────────────────── -->
+      <section class="view" id="view-platform-ratings">
+        <div class="view-head">
+          <div>
+            <h2>Rate Us Feedback</h2>
+            <div class="sub">Platform ratings submitted by customers. These are separate from restaurant/order reviews.</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="platform-ratings-refresh-btn">↻ Refresh</button>
+        </div>
+        <div id="platform-rating-summary" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px;"></div>
+        <div class="table-wrap" id="platform-ratings-admin-wrap"><div class="state-block"><div class="spinner-lg"></div></div></div>
+      </section>
+
       <section class="view" id="view-manage-reviews">
         <div class="card mgmt-card">
           <div class="toolbar"><div class="sub" style="margin:0;">Moderate verified customer reviews.</div><button class="btn btn-ghost btn-sm" id="reviews-refresh-btn">↻ Refresh</button></div>
@@ -1047,6 +1064,7 @@
 <script src="manage-vendors.js"></script>
 <script src="manage-restaurants.js"></script>
 <script src="manage-reviews.js"></script>
+<script src="manage-platform-ratings.js"></script>
 <script src="manage-orders.js"></script>
 <script src="manage-customers.js"></script>
 <script src="manage-categories.js"></script>

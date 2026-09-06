@@ -23,6 +23,7 @@
     'manage-vendors':     { title: 'Manage Vendors',       sub: 'Vendor accounts and their restaurants' },
     'manage-restaurants': { title: 'Manage Restaurants',   sub: 'Every restaurant live on Nearbite' },
     'manage-reviews':      { title: 'Manage Reviews',       sub: 'Verified customer feedback and moderation' },
+    'platform-ratings':   { title: 'Rate Us Feedback',    sub: 'Customer feedback about the Eatswada platform' },
     'manage-orders':      { title: 'Manage Orders',        sub: 'Track and update order status' },
     'manage-riders':      { title: 'Manage Riders',        sub: 'Delivery riders and their live status' },
     'manage-customers':   { title: 'Manage Customers',     sub: 'Customers ordering on Nearbite' },
