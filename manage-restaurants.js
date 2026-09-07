@@ -259,7 +259,6 @@
       document.getElementById('rm-isBestSeller').checked = r.isBestSeller === true;
       document.getElementById('rm-isNearFast').checked = r.isNearFast === true;
       document.getElementById('rm-freeDeliveryEnabled').checked = r.freeDeliveryEnabled !== false;
-      document.getElementById('rm-codEnabled').checked = r.codEnabled === true;
       document.getElementById('rm-freeDeliveryAbove').value = r.freeDeliveryAbove ?? '';
       document.getElementById('rm-minOrder').value = r.minOrder ?? 0;
       document.getElementById('rm-deliveryRadiusKm').value = r.deliveryRadiusKm ?? 15;
@@ -407,7 +406,6 @@
         isBestSeller: document.getElementById('rm-isBestSeller').checked,
         isNearFast: document.getElementById('rm-isNearFast').checked,
         freeDeliveryEnabled: document.getElementById('rm-freeDeliveryEnabled').checked,
-        codEnabled: document.getElementById('rm-codEnabled').checked,
         freeDeliveryAbove: Number(document.getElementById('rm-freeDeliveryAbove').value || 0),
         minOrder: Number(document.getElementById('rm-minOrder').value || 0),
         deliveryRadiusKm: Number(document.getElementById('rm-deliveryRadiusKm').value || 15),

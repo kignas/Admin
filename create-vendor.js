@@ -160,7 +160,6 @@
       estimatedDeliveryMax: Number(f('cv-deliveryMax').value),
       deliveryFee: f('cv-deliveryFee').value ? Number(f('cv-deliveryFee').value) : undefined,
       freeDeliveryEnabled: f('cv-freeDeliveryEnabled').checked,
-      codEnabled: f('cv-codEnabled').checked,
       homeOrder: f('cv-homeOrder')?.value ? Number(f('cv-homeOrder').value) : undefined,
       displayPriority: Number(f('cv-displayPriority')?.value || 0),
       isFeatured: !!f('cv-isFeatured')?.checked,
