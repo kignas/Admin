@@ -20,6 +20,7 @@
   const PAGE_META = {
     dashboard:            { title: 'Dashboard',            sub: 'Live snapshot of the Nearbite ops today' },
     'create-vendor':      { title: 'Create Vendor',        sub: 'Onboard a new restaurant partner' },
+    'vendor-applications': { title: 'Vendor Applications', sub: 'Review and approve restaurant partner applications' },
     'manage-vendors':     { title: 'Manage Vendors',       sub: 'Vendor accounts and their restaurants' },
     'manage-restaurants': { title: 'Manage Restaurants',   sub: 'Every restaurant live on Nearbite' },
     'manage-reviews':      { title: 'Manage Reviews',       sub: 'Verified customer feedback and moderation' },

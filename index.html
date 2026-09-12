@@ -36,6 +36,12 @@
         </button>
       </li>
       <li>
+        <button class="nav-item" data-view="vendor-applications">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="M17 16h3"/></svg></span>
+          Vendor Applications
+        </button>
+      </li>
+      <li>
         <button class="nav-item" data-view="manage-vendors">
           <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16.5 8.3a3 3 0 1 1 0 5.9M19.5 20a5 5 0 0 0-4-4.9"/></svg></span>
           Manage Vendors
@@ -355,6 +361,34 @@
             <div class="form-result" id="cv-result"></div>
           </div>
         </form>
+      </section>
+
+      <!-- ── Vendor Applications ───────────────────────────────── -->
+      <section class="view" id="view-vendor-applications">
+        <div class="view-head">
+          <div>
+            <h2>Vendor Applications</h2>
+            <div class="sub">Review restaurant owners before they become active Eatswada partners.</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="applications-refresh">↻ Refresh</button>
+        </div>
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <select id="applications-status-filter" aria-label="Application status">
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <span class="toolbar-count" id="applications-count"></span>
+          </div>
+          <div class="table-wrap" id="applications-table-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+          <div class="table-footer" id="applications-footer" style="display:none;">
+            <span class="pagination-info" id="applications-page-info"></span>
+            <div class="pagination" id="applications-pagination"></div>
+          </div>
+        </div>
       </section>
 
       <!-- ── Manage Vendors ────────────────────────────────────── -->
