@@ -20,7 +20,7 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Restaurant</th><th>Homepage</th><th>Owner</th><th>Cuisine</th><th>Rating</th><th>Orders</th><th>Status</th><th></th>
+            <th>Restaurant</th><th>Homepage</th><th>Owner</th><th>Cuisine</th><th>Rating</th><th>Orders</th><th>Commission</th><th>Status</th><th></th>
           </tr>
         </thead>
         <tbody>
@@ -41,6 +41,7 @@
               <td>${escapeHtml(r.cuisine || '—')}</td>
               <td class="mono">${r.rating != null ? r.rating.toFixed(1) : '—'} ★</td>
               <td class="mono">${r.totalOrders ?? 0}</td>
+              <td class="mono">${Number(r.commissionRate ?? 15).toFixed(2).replace(/\.00$/, '')}%</td>
               <td>
                 ${r.isActive
                   ? `<label class="switch" title="${r.isOpen ? 'Close restaurant' : 'Open restaurant'}">
@@ -249,6 +250,15 @@
       document.getElementById('rm-address').value = r.address || '';
       document.getElementById('rm-phone').value = r.phone || '';
       document.getElementById('rm-description').value = r.description || '';
+      document.getElementById('rm-commissionRate').value = '';
+      document.getElementById('rm-commission-error').textContent = '';
+      document.getElementById('rm-commission-result').className = 'modal-result';
+      try {
+        const commissionRes = await apiRequest(`/admin/restaurants/${id}/commission`);
+        document.getElementById('rm-commissionRate').value = commissionRes.data?.commissionRate ?? 15;
+      } catch (commissionErr) {
+        document.getElementById('rm-commission-error').textContent = commissionErr.message || 'Could not load commission rate.';
+      }
       document.getElementById('rm-cuisine').value = (r.cuisine || []).join(', ');
       document.getElementById('rm-deliveryFee').value = r.deliveryFee ?? '';
       document.getElementById('rm-rating').value = r.rating ?? '';
@@ -333,6 +343,38 @@
   }
   availabilitySaveBtn.addEventListener('click', saveAvailability);
   bindWeeklyHours('rm-weekly-hours');
+
+  const commissionSaveBtn = document.getElementById('rm-commission-save');
+  commissionSaveBtn.addEventListener('click', async () => {
+    const id = document.getElementById('rm-id').value;
+    const input = document.getElementById('rm-commissionRate');
+    const errorEl = document.getElementById('rm-commission-error');
+    const resultEl = document.getElementById('rm-commission-result');
+    const rate = Number(input.value);
+    errorEl.textContent = '';
+    resultEl.className = 'modal-result';
+    if (!Number.isFinite(rate) || rate < 0 || rate > 100) {
+      errorEl.textContent = 'Enter a commission between 0% and 100%.';
+      return;
+    }
+    commissionSaveBtn.disabled = true;
+    const oldText = commissionSaveBtn.textContent;
+    commissionSaveBtn.textContent = 'Saving…';
+    try {
+      const res = await apiRequest(`/admin/restaurants/${id}/commission`, { method: 'PATCH', body: { commissionRate: Math.round(rate * 100) / 100 } });
+      input.value = res.data?.commissionRate ?? rate;
+      resultEl.textContent = res.message || 'Commission rate updated.';
+      resultEl.className = 'modal-result show success';
+      showToast('Commission rate updated.', 'success');
+      loadRestaurants();
+    } catch (err) {
+      errorEl.textContent = err.message || 'Could not update commission rate.';
+      resultEl.className = 'modal-result show error';
+    } finally {
+      commissionSaveBtn.disabled = false;
+      commissionSaveBtn.textContent = oldText;
+    }
+  });
 
   editForm.addEventListener('submit', async (e) => {
     e.preventDefault();

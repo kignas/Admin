@@ -634,6 +634,17 @@
           <div class="hint">Up to 1000 characters.</div>
         </div>
         <div class="field">
+          <label for="rm-commissionRate">Platform commission</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="rm-commissionRate" min="0" max="100" step="0.01" placeholder="15" />
+            <span style="font-weight:700;color:var(--text-muted,#6b7280);">%</span>
+            <button type="button" class="btn btn-ghost btn-sm" id="rm-commission-save">Save</button>
+          </div>
+          <div class="hint">Applies to new orders only. Existing orders keep their commission snapshot.</div>
+          <div class="error-msg" id="rm-commission-error"></div>
+          <div class="modal-result" id="rm-commission-result"></div>
+        </div>
+        <div class="field">
           <label for="rm-cuisine">Cuisine</label>
           <input type="text" id="rm-cuisine" placeholder="Comma-separated" />
           <div class="error-msg" data-error-for="rm-cuisine"></div>
@@ -1048,6 +1059,7 @@
 <script src="create-vendor.js"></script>
 <script src="modal.js"></script>
 <script src="manage-vendors.js"></script>
+<script src="vendor-applications.js"></script>
 <script src="manage-restaurants.js"></script>
 <script src="manage-reviews.js"></script>
 <script src="manage-platform-ratings.js"></script>
