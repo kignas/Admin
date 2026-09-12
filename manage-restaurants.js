@@ -56,11 +56,14 @@
                     <button class="icon-btn restaurant-edit-btn" data-id="${r.id}" title="Edit restaurant">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                     </button>
-                    <button class="icon-btn restaurant-deactivate-btn" data-id="${r.id}" data-name="${escapeHtml(r.name)}" title="Deactivate restaurant">
+                    <button class="icon-btn restaurant-delete-btn" data-id="${r.id}" data-name="${escapeHtml(r.name)}" title="Permanently delete restaurant" aria-label="Permanently delete restaurant">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
                     </button>
                   ` : `
                     <button class="btn btn-sm btn-ghost restaurant-restore-btn" data-id="${r.id}" data-name="${escapeHtml(r.name)}">Restore</button>
+                    <button class="icon-btn restaurant-delete-btn" data-id="${r.id}" data-name="${escapeHtml(r.name)}" title="Permanently delete restaurant" aria-label="Permanently delete restaurant">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
+                    </button>
                   `}
                 </div>
               </td>
@@ -76,8 +79,8 @@
     tableWrap.querySelectorAll('.restaurant-edit-btn').forEach(btn => {
       btn.addEventListener('click', () => openEditModal(btn.dataset.id));
     });
-    tableWrap.querySelectorAll('.restaurant-deactivate-btn').forEach(btn => {
-      btn.addEventListener('click', () => deactivateRestaurant(btn.dataset.id, btn.dataset.name));
+    tableWrap.querySelectorAll('.restaurant-delete-btn').forEach(btn => {
+      btn.addEventListener('click', () => deleteRestaurantPermanently(btn.dataset.id, btn.dataset.name, btn));
     });
     tableWrap.querySelectorAll('.restaurant-restore-btn').forEach(btn => {
       btn.addEventListener('click', () => restoreRestaurant(btn.dataset.id, btn.dataset.name, btn));
@@ -111,20 +114,38 @@
     }
   }
 
-  async function deactivateRestaurant(id, name) {
-    if (!confirm(`Deactivate "${name}"? It will stop accepting orders immediately. You can restore it any time from the Deactivated filter.`)) return;
+  async function deleteRestaurantPermanently(id, name, btn) {
+    // Destructive action: require both an explicit confirmation and exact name entry.
+    if (!confirm(
+      `PERMANENTLY DELETE "${name}"?\\n\\n` +
+      `This cannot be undone. The restaurant, its menu items and reviews will be deleted. ` +
+      `Historical orders and financial records will be preserved.`
+    )) return;
+
+    const typedName = prompt(`Type the restaurant name exactly to confirm permanent deletion:\\n\\n${name}`);
+    if (typedName === null) return;
+    if (typedName.trim() !== name.trim()) {
+      showToast('Deletion cancelled: restaurant name did not match.', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    const oldTitle = btn.title;
+    btn.title = 'Deleting…';
+
     try {
       await apiRequest(`/restaurants/${id}`, { method: 'DELETE' });
-      showToast('Restaurant deactivated. It can be restored from the Deactivated filter.', 'success');
-      loadRestaurants();
+      showToast(`"${name}" was permanently deleted.`, 'success');
+      await loadRestaurants();
     } catch (err) {
-      showToast(err.message || 'Could not deactivate restaurant.', 'error');
+      showToast(err.message || 'Could not permanently delete restaurant.', 'error');
+      btn.disabled = false;
+      btn.title = oldTitle;
     }
   }
 
-  // Restore reuses the existing generic restaurant-update endpoint
-  // (PUT /api/restaurants/:id) rather than a new dedicated route —
-  // isActive/isOpen are ordinary fields on that document.
+  // Restore is retained only for legacy restaurants that were previously soft-deactivated.
+  // New restaurant removal uses the permanent DELETE endpoint above.
   async function restoreRestaurant(id, name, btn) {
     if (!confirm(`Restore "${name}"? It will become active and open for orders again.`)) return;
     btn.disabled = true;
