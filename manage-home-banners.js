@@ -17,6 +17,38 @@
 
   if (!list || !form) return;
 
+  // Header control is injected into the existing Admin view so no other admin
+  // screens/files need to be replaced.
+  const themes = [
+    ['anime', 'Anime / White', 'Anime artwork on a clean white header'],
+    ['pink', 'Fresh Pink', 'Soft food-inspired pink header'],
+    ['lavender', 'Lavender', 'Purple/lavender food header'],
+    ['magenta', 'Eatswada Magenta', 'Deep magenta food header']
+  ];
+
+  function ensureHeaderControls() {
+    if (document.getElementById('es-header-control')) return;
+    const host = document.getElementById('view-home-banners');
+    if (!host) return;
+    const box = document.createElement('div');
+    box.id = 'es-header-control';
+    box.className = 'es-header-control card';
+    box.innerHTML = `
+      <div class="es-header-control-copy"><strong>Customer Header Control</strong><span>Publish multiple headers for manual left/right swipe. Nothing changes automatically.</span></div>
+      <div class="es-header-control-grid">
+        ${themes.map(([id,name,desc]) => `<div class="es-header-theme" data-theme-card="${id}"><div><strong>${name}</strong><small>${desc}</small></div><button type="button" class="btn btn-ghost btn-sm" data-theme-filter="${id}">Use / Pause</button></div>`).join('')}
+      </div>`;
+    host.insertBefore(box, host.querySelector('.home-banner-notice'));
+    box.querySelectorAll('[data-theme-filter]').forEach(btn => btn.addEventListener('click', () => {
+      const theme = btn.dataset.themeFilter;
+      const match = banners.find(b => b.headerTheme === theme);
+      if (match) toggleBanner(match._id);
+      else {
+        showToast(`Create a ${theme} header first, then publish it.`, 'error');
+      }
+    }));
+  }
+
   let banners = [];
   let draggedId = null;
   let saving = false;
@@ -70,6 +102,16 @@
     const input = document.getElementById(id);
     if (box) box.textContent = message || '';
     if (input) input.classList.toggle('invalid', !!message);
+  }
+
+  function ensureThemeField() {
+    if (document.getElementById('hb-headerTheme')) return;
+    const bg = document.getElementById('hb-background');
+    if (!bg || !bg.parentElement?.parentElement) return;
+    const field = document.createElement('div');
+    field.className = 'field';
+    field.innerHTML = `<label for="hb-headerTheme">Header style</label><select id="hb-headerTheme">${themes.map(([id,name]) => `<option value="${id}">${name}</option>`).join('')}</select><div class="hint">This artwork becomes part of the homepage header. It will not appear as a separate offer card.</div>`;
+    bg.parentElement.parentElement.appendChild(field);
   }
 
   function updatePreview() {
@@ -127,7 +169,7 @@
               <span class="home-banner-status ${cls}"><i></i>${status}</span>
             </div>
             <div class="home-banner-meta">
-              <span>Priority ${Number(b.priority || 0)}</span>
+              <span>Theme ${esc(b.headerTheme || 'anime')}</span><span>Priority ${Number(b.priority || 0)}</span>
               <span>${esc(b.animation || 'fade')} entrance</span>
               <span>${b.startAt || b.endAt ? `${formatDate(b.startAt)} → ${formatDate(b.endAt)}` : 'Always on when active'}</span>
             </div>
@@ -181,6 +223,8 @@
   }
 
   async function load() {
+    ensureHeaderControls();
+    ensureThemeField();
     list.innerHTML = `<div class="card state-block"><div class="spinner-lg"></div></div>`;
     try {
       const res = await apiRequest('/home-banners/all');
@@ -192,11 +236,13 @@
   }
 
   function resetForm() {
+    ensureThemeField();
     form.reset();
     document.getElementById('hb-id').value = '';
     document.getElementById('hb-background').value = '#0B6B46';
     document.getElementById('hb-textColor').value = 'light';
     document.getElementById('hb-animation').value = 'fade';
+    document.getElementById('hb-headerTheme').value = 'anime';
     document.getElementById('hb-priority').value = '0';
     document.getElementById('hb-active').checked = true;
     document.getElementById('hb-image').value = '';
@@ -230,7 +276,9 @@
     setField('hb-mobileImage', b.mobileImage);
     setField('hb-background', b.background || '#0B6B46');
     setField('hb-textColor', b.textColor || 'light');
+    ensureThemeField();
     setField('hb-animation', b.animation || 'fade');
+    setField('hb-headerTheme', b.headerTheme || 'anime');
     setField('hb-priority', b.priority ?? 0);
     setField('hb-startAt', toDatetimeLocal(b.startAt));
     setField('hb-endAt', toDatetimeLocal(b.endAt));
@@ -284,6 +332,7 @@
       background: document.getElementById('hb-background').value.trim() || '#0B6B46',
       textColor: document.getElementById('hb-textColor').value,
       animation: document.getElementById('hb-animation').value,
+      headerTheme: document.getElementById('hb-headerTheme').value,
       priority: Number(document.getElementById('hb-priority').value || 0),
       startAt: fromDatetimeLocal(document.getElementById('hb-startAt').value),
       endAt: fromDatetimeLocal(document.getElementById('hb-endAt').value),
