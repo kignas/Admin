@@ -1,0 +1,31 @@
+/* ==========================================================================
+   Eatswada Admin — Home Header & Banner Management
+   ========================================================================== */
+.home-banner-view-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.home-banner-view-head h2{margin:0 0 5px;font-size:20px;letter-spacing:-.4px}
+.home-banner-view-head p{margin:0;color:var(--text-muted,#6b7280);font-size:13px}
+.home-banner-notice{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid rgba(16,185,129,.18);background:rgba(16,185,129,.06);border-radius:14px;margin-bottom:14px}
+.home-banner-notice-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#10b981;color:#fff;font-weight:900;flex:0 0 auto}
+.home-banner-notice strong,.home-banner-notice span{display:block}
+.home-banner-notice strong{font-size:13px;color:var(--text,#111827)}
+.home-banner-notice span{font-size:12px;color:var(--text-muted,#6b7280);margin-top:2px}
+.home-banner-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 15px;margin-bottom:14px}
+.home-banner-toolbar strong,.home-banner-toolbar span{display:block}
+.home-banner-toolbar strong{font-size:13px}
+.home-banner-toolbar span{font-size:11px;color:var(--text-muted,#6b7280);margin-top:2px}
+.home-banners-list{display:grid;gap:14px}
+.home-banner-card{display:grid;grid-template-columns:220px minmax(0,1fr);overflow:hidden;padding:0;cursor:grab}
+.home-banner-card.dragging{opacity:.5;transform:scale(.995)}
+.home-banner-drag{position:absolute;display:grid;place-items:center;width:28px;height:28px;margin:10px;border-radius:9px;background:rgba(0,0,0,.45);color:#fff;font-size:15px;letter-spacing:-2px;z-index:2;cursor:grab}
+.home-banner-thumb{position:relative;min-height:150px;overflow:hidden;background:#0b6b46}
+.home-banner-thumb img{width:100%;height:100%;min-height:150px;object-fit:cover;display:block}
+.home-banner-thumb-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.54),rgba(0,0,0,.08) 75%)}
+.home-banner-thumb-copy{position:absolute;left:18px;right:12px;bottom:16px;color:#fff;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.home-banner-thumb-copy.dark{color:#111827}.home-banner-thumb-copy span{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:.9}.home-banner-thumb-copy strong{font-size:18px;line-height:1.08;letter-spacing:-.3px}.home-banner-thumb-copy small{font-size:11px;font-weight:700;opacity:.9}
+.home-banner-card-body{padding:18px;min-width:0}.home-banner-card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.home-banner-card-top h3{margin:0;font-size:16px;letter-spacing:-.2px}.home-banner-card-top p{margin:5px 0 0;color:var(--text-muted,#6b7280);font-size:12px;line-height:1.45}
+.home-banner-status{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:800}.home-banner-status i{width:6px;height:6px;border-radius:50%;background:currentColor}.home-banner-status.live{color:#047857;background:#ecfdf5}.home-banner-status.paused{color:#6b7280;background:#f3f4f6}.home-banner-status.scheduled{color:#2563eb;background:#eff6ff}.home-banner-status.expired{color:#b45309;background:#fffbeb}
+.home-banner-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}.home-banner-meta span{font-size:10px;font-weight:700;color:var(--text-muted,#6b7280);background:var(--surface-2,#f8fafc);border:1px solid var(--line,#e5e7eb);border-radius:999px;padding:6px 8px}
+.home-banner-actions{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap}.btn-danger-soft{border:1px solid #fecaca!important;background:#fff5f5!important;color:#b91c1c!important}.home-banner-empty{padding:52px 20px}.home-banner-empty-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;margin:0 auto 12px;background:#ecfdf5;color:#059669;font-size:24px}.home-banner-empty h4,.home-banner-empty p{text-align:center}.home-banner-empty h4{margin:0;font-size:15px}.home-banner-empty p{max-width:440px;margin:6px auto 16px;color:var(--text-muted,#6b7280);font-size:12px;line-height:1.5}
+.home-banner-modal-box{max-width:760px}.home-banner-preview{position:relative;min-height:160px;border-radius:16px;overflow:hidden;background:#0b6b46 center/cover no-repeat;margin-bottom:18px;display:flex;align-items:flex-end;padding:22px;color:#fff;isolation:isolate}.home-banner-preview::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.56),rgba(0,0,0,.04));z-index:-1}.home-banner-preview-copy{display:flex;flex-direction:column;align-items:flex-start;gap:5px;max-width:72%}.home-banner-preview-copy span{font-size:9px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase}.home-banner-preview-copy strong{font-size:24px;line-height:1.05;letter-spacing:-.6px}.home-banner-preview-copy small{font-size:12px;font-weight:600;opacity:.92}
+.check-row{display:flex!important;align-items:center;gap:9px;cursor:pointer}.check-row input{width:17px;height:17px}
+@media(max-width:700px){.home-banner-card{grid-template-columns:1fr}.home-banner-thumb{min-height:180px}.home-banner-thumb img{min-height:180px}.home-banner-card-body{padding:15px}.home-banner-card-top{display:block}.home-banner-status{margin-top:10px}.home-banner-view-head{align-items:stretch;flex-direction:column}.home-banner-view-head .btn{align-self:flex-start}.home-banner-preview-copy{max-width:90%}}

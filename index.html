@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Nearbite Admin</title>
+<title>Eatswada Admin</title>
 <link rel="stylesheet" href="style.css" />
 <link rel="stylesheet" href="layout.css" />
 <link rel="stylesheet" href="upload-widget.css" />
+<link rel="stylesheet" href="manage-home-banners.css" />
 </head>
 <body>
 
@@ -17,7 +18,7 @@
     <div class="sidebar-brand">
       <div class="mark">N</div>
       <div>
-        <div class="name">Nearbite</div>
+        <div class="name">Eatswada</div>
         <div class="tag">Admin</div>
       </div>
     </div>
@@ -27,6 +28,12 @@
         <button class="nav-item active" data-view="dashboard">
           <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
           Dashboard
+        </button>
+      </li>
+      <li>
+        <button class="nav-item" data-view="home-banners">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 15 5-5 4 4 3-3 6 6"/><circle cx="8" cy="8" r="1.5"/></svg></span>
+          Header &amp; Banners
         </button>
       </li>
       <li>
@@ -143,6 +150,37 @@
               <div class="state-block"><div class="spinner-lg"></div></div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- ── Home Header & Banners ─────────────────────────────── -->
+      <section class="view" id="view-home-banners">
+        <div class="view-head home-banner-view-head">
+          <div>
+            <h2>Header &amp; Banners</h2>
+            <p>Control the customer homepage hero without editing frontend code.</p>
+          </div>
+          <button class="btn btn-primary" id="home-banner-add-btn">+ Add banner</button>
+        </div>
+
+        <div class="home-banner-notice">
+          <div class="home-banner-notice-icon">✓</div>
+          <div>
+            <strong>What's on your mind? stays untouched.</strong>
+            <span>Only the premium header and promotional hero are controlled here.</span>
+          </div>
+        </div>
+
+        <div class="home-banner-toolbar card">
+          <div>
+            <strong id="home-banner-count">0 banners</strong>
+            <span>Drag cards to change display priority.</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="home-banner-refresh-btn">Refresh</button>
+        </div>
+
+        <div id="home-banners-list" class="home-banners-list">
+          <div class="card state-block"><div class="spinner-lg"></div></div>
         </div>
       </section>
 
@@ -592,6 +630,127 @@
       </section>
 
     </main>
+  </div>
+</div>
+
+<!-- Home Banner Add/Edit -->
+<div class="modal-overlay" id="home-banner-modal">
+  <div class="modal-box home-banner-modal-box">
+    <div class="modal-head">
+      <h3 id="home-banner-modal-title">Add banner</h3>
+      <button class="modal-close" data-close-modal="home-banner-modal" type="button">✕</button>
+    </div>
+    <form id="home-banner-form" novalidate>
+      <div class="modal-body">
+        <input type="hidden" id="hb-id" />
+
+        <div class="home-banner-preview" id="hb-preview">
+          <div class="home-banner-preview-copy">
+            <span id="hb-preview-badge">EATSWADA</span>
+            <strong id="hb-preview-title">Your banner preview</strong>
+            <small id="hb-preview-subtitle">Upload an image and enter your offer.</small>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">Content</div>
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="hb-title">Title *</label>
+              <input id="hb-title" maxlength="90" placeholder="Good food near you" required />
+              <div class="error-msg" data-error-for="hb-title"></div>
+            </div>
+            <div class="field span-2">
+              <label for="hb-subtitle">Subtitle</label>
+              <input id="hb-subtitle" maxlength="140" placeholder="Fresh meals from restaurants around Maynaguri" />
+            </div>
+            <div class="field">
+              <label for="hb-offerText">Offer text</label>
+              <input id="hb-offerText" maxlength="60" placeholder="₹50 OFF on your first order" />
+            </div>
+            <div class="field">
+              <label for="hb-badgeText">Badge</label>
+              <input id="hb-badgeText" maxlength="40" placeholder="LIMITED OFFER" />
+            </div>
+            <div class="field">
+              <label for="hb-ctaText">Button text</label>
+              <input id="hb-ctaText" maxlength="30" placeholder="Order now" />
+            </div>
+            <div class="field">
+              <label for="hb-ctaUrl">Button destination</label>
+              <input id="hb-ctaUrl" maxlength="300" placeholder="/under99.html or https://…" />
+              <div class="hint">Use a relative Eatswada page or HTTPS URL.</div>
+              <div class="error-msg" data-error-for="hb-ctaUrl"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">Images</div>
+          <div class="form-grid">
+            <div class="field span-2">
+              <label>Desktop image *</label>
+              <div class="img-upload" data-img-upload data-upload-type="banners" data-target-input="hb-image">
+                <div class="img-upload-preview" data-preview><span class="img-upload-empty" data-empty>Desktop banner — recommended wide image</span></div>
+                <label class="btn btn-ghost btn-sm img-upload-btn"><span data-btn-label>Upload image</span><input type="file" accept="image/*" data-file-input hidden /></label>
+                <div class="img-upload-progress" data-progress-wrap style="display:none;"><div class="img-upload-progress-fill" data-progress-fill></div></div>
+              </div>
+              <input type="hidden" id="hb-image" />
+              <div class="error-msg" data-error-for="hb-image"></div>
+            </div>
+            <div class="field span-2">
+              <label>Mobile image <span style="text-transform:none;font-weight:400;">(optional)</span></label>
+              <div class="img-upload" data-img-upload data-upload-type="banners" data-target-input="hb-mobileImage">
+                <div class="img-upload-preview" data-preview><span class="img-upload-empty" data-empty>Optional mobile crop</span></div>
+                <label class="btn btn-ghost btn-sm img-upload-btn"><span data-btn-label>Upload image</span><input type="file" accept="image/*" data-file-input hidden /></label>
+                <div class="img-upload-progress" data-progress-wrap style="display:none;"><div class="img-upload-progress-fill" data-progress-fill></div></div>
+              </div>
+              <input type="hidden" id="hb-mobileImage" />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">Display</div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="hb-background">Background</label>
+              <input id="hb-background" type="text" maxlength="120" placeholder="#0B6B46" />
+              <div class="hint">CSS color/gradient value used behind the image.</div>
+            </div>
+            <div class="field">
+              <label for="hb-textColor">Text contrast</label>
+              <select id="hb-textColor"><option value="light">Light</option><option value="dark">Dark</option></select>
+            </div>
+            <div class="field">
+              <label for="hb-animation">Entrance animation</label>
+              <select id="hb-animation"><option value="fade">Fade</option><option value="slide">Slide</option><option value="scale">Scale</option><option value="none">None</option></select>
+            </div>
+            <div class="field">
+              <label for="hb-priority">Priority</label>
+              <input id="hb-priority" type="number" min="0" max="9999" step="1" value="0" />
+              <div class="hint">Higher numbers appear first.</div>
+            </div>
+            <div class="field">
+              <label for="hb-startAt">Start</label>
+              <input id="hb-startAt" type="datetime-local" />
+            </div>
+            <div class="field">
+              <label for="hb-endAt">End</label>
+              <input id="hb-endAt" type="datetime-local" />
+            </div>
+            <div class="field span-2">
+              <label class="check-row"><input id="hb-active" type="checkbox" checked /> <span>Publish this banner immediately when its schedule allows.</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <div class="modal-result" id="home-banner-modal-result"></div>
+        <button type="button" class="btn btn-ghost" data-close-modal="home-banner-modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="home-banner-save-btn"><span id="home-banner-save-text">Create banner</span></button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -1100,6 +1259,7 @@
 <script src="manage-orders.js"></script>
 <script src="manage-customers.js"></script>
 <script src="manage-categories.js"></script>
+<script src="manage-home-banners.js"></script>
 <script src="manage-menu.js"></script>
 <script src="manage-riders.js"></script>
 </body>

@@ -18,18 +18,19 @@
 
   // ── Sidebar routing ─────────────────────────────────────────
   const PAGE_META = {
-    dashboard:            { title: 'Dashboard',            sub: 'Live snapshot of the Nearbite ops today' },
+    dashboard:            { title: 'Dashboard',            sub: 'Live snapshot of the Eatswada ops today' },
+    'home-banners':      { title: 'Header & Banners',     sub: 'Control the customer homepage hero and promotions' },
     'create-vendor':      { title: 'Create Vendor',        sub: 'Onboard a new restaurant partner' },
     'vendor-applications': { title: 'Vendor Applications', sub: 'Review and approve restaurant partner applications' },
     'manage-vendors':     { title: 'Manage Vendors',       sub: 'Vendor accounts and their restaurants' },
-    'manage-restaurants': { title: 'Manage Restaurants',   sub: 'Every restaurant live on Nearbite' },
+    'manage-restaurants': { title: 'Manage Restaurants',   sub: 'Every restaurant live on Eatswada' },
     'manage-reviews':      { title: 'Manage Reviews',       sub: 'Verified customer feedback and moderation' },
     'platform-ratings':   { title: 'Rate Us Feedback',    sub: 'Customer feedback about the Eatswada platform' },
     'manage-orders':      { title: 'Manage Orders',        sub: 'Track and update order status' },
     'manage-riders':      { title: 'Manage Riders',        sub: 'Delivery riders and their live status' },
-    'manage-customers':   { title: 'Manage Customers',     sub: 'Customers ordering on Nearbite' },
+    'manage-customers':   { title: 'Manage Customers',     sub: 'Customers ordering on Eatswada' },
     'manage-categories':  { title: 'Manage Categories',    sub: '"What\'s on your mind?" homepage categories' },
-    'manage-menu':        { title: 'Manage Menu',          sub: 'Menu items across every restaurant on Nearbite' },
+    'manage-menu':        { title: 'Manage Menu',          sub: 'Menu items across every restaurant on Eatswada' },
   };
 
   const navItems = document.querySelectorAll('.nav-item[data-view]');
