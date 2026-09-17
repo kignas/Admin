@@ -175,6 +175,117 @@
   const saveBtn = document.getElementById('menu-item-modal-save');
   const saveText = document.getElementById('menu-item-modal-save-text');
   const resultBox = document.getElementById('menu-item-modal-result');
+
+  /* ============================================================
+     CUSTOMIZATION BUILDER — define option groups on a menu item
+     (size / toppings / add-ons), matching the extended Menu model:
+       { title, required, minSelect, maxSelect, options:[{label,extraPrice,isVeg}] }
+     Self-contained: injects its own UI into the form and contributes
+     `customizations` to the save payload.
+     ============================================================ */
+  (function injectCustCss(){
+    if (document.getElementById('cust-css')) return;
+    const s = document.createElement('style'); s.id = 'cust-css';
+    s.textContent = `
+      #mi-cust-wrap{margin-top:16px;border-top:1px solid #e5e7eb;padding-top:14px}
+      #mi-cust-wrap .cust-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+      #mi-cust-wrap .cust-head b{font-size:14px}
+      #mi-cust-wrap .cust-head span{font-size:12px;color:#6b7280}
+      .cust-group{border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin-bottom:10px;background:#fafafa}
+      .cust-group-top{display:flex;gap:8px}
+      .cust-title{flex:1;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font:inherit}
+      .cust-group-rules{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:10px 0;font-size:13px;color:#374151}
+      .cust-group-rules label{display:flex;gap:6px;align-items:center}
+      .cust-group-rules select,.cust-max{padding:6px 8px;border:1px solid #d1d5db;border-radius:8px;font:inherit}
+      .cust-max{width:64px}
+      .cust-opt{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+      .cust-opt-label{flex:1;padding:7px 9px;border:1px solid #d1d5db;border-radius:8px;font:inherit}
+      .cust-opt-price{width:96px;padding:7px 9px;border:1px solid #d1d5db;border-radius:8px;font:inherit}
+      .cust-opt-veg{font-size:12px;color:#374151;white-space:nowrap}
+      .cust-del-group,.cust-del-opt{border:0;background:#fee2e2;color:#b91c1c;border-radius:8px;width:30px;height:30px;cursor:pointer;font-weight:700;flex:none}
+      .cust-add-option{margin-top:4px;border:1px dashed #159A62;background:#fff;color:#0F7A4D;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;font-size:12px}
+      #mi-cust-add-group{border:1px dashed #159A62;background:#E6F4EC;color:#0F7A4D;border-radius:10px;padding:9px 14px;font-weight:800;cursor:pointer;font-size:13px}`;
+    document.head.appendChild(s);
+  })();
+
+  const custWrap = document.createElement('div');
+  custWrap.id = 'mi-cust-wrap';
+  custWrap.innerHTML =
+    '<div class="cust-head"><b>Customization groups</b><span>Optional — size, toppings, add-ons</span></div>' +
+    '<div id="mi-cust-groups"></div>' +
+    '<button type="button" id="mi-cust-add-group">+ Add group</button>';
+  (function placeBuilder(){
+    const last = document.getElementById('mi-isRecommended');
+    const anchor = last ? last.closest('.field,.form-group,.form-row,label,div') : null;
+    if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(custWrap, anchor.nextSibling);
+    else if (form) form.appendChild(custWrap);
+  })();
+  const custGroups = custWrap.querySelector('#mi-cust-groups');
+  const custEsc = (v) => String(v == null ? '' : v).replace(/"/g, '&quot;');
+
+  function custOptionRow(o){
+    o = o || {};
+    const row = document.createElement('div');
+    row.className = 'cust-opt';
+    row.innerHTML =
+      '<input class="cust-opt-label" placeholder="Option (e.g. Medium)" value="' + custEsc(o.label) + '">' +
+      '<input class="cust-opt-price" type="number" min="0" placeholder="₹ extra" value="' + (o.extraPrice != null ? o.extraPrice : '') + '">' +
+      '<label class="cust-opt-veg"><input type="checkbox" class="cust-opt-veg-cb" ' + (o.isVeg !== false ? 'checked' : '') + '> Veg</label>' +
+      '<button type="button" class="cust-del-opt" aria-label="Remove option">✕</button>';
+    return row;
+  }
+  function custGroupCard(g){
+    g = g || {};
+    const multi = Number(g.maxSelect || 1) > 1;
+    const card = document.createElement('div');
+    card.className = 'cust-group';
+    card.innerHTML =
+      '<div class="cust-group-top"><input class="cust-title" placeholder="Group name (e.g. Choose your size)" value="' + custEsc(g.title) + '">' +
+      '<button type="button" class="cust-del-group" aria-label="Remove group">✕</button></div>' +
+      '<div class="cust-group-rules">' +
+        '<label><input type="checkbox" class="cust-required" ' + (g.required ? 'checked' : '') + '> Required</label>' +
+        '<label>Selection <select class="cust-type"><option value="single" ' + (!multi ? 'selected' : '') + '>Choose 1</option>' +
+        '<option value="multi" ' + (multi ? 'selected' : '') + '>Choose many</option></select></label>' +
+        '<label class="cust-max-wrap" style="' + (multi ? '' : 'display:none') + '">Max <input type="number" class="cust-max" min="1" value="' + (multi ? (g.maxSelect || 2) : 2) + '"></label>' +
+      '</div><div class="cust-options"></div>' +
+      '<button type="button" class="cust-add-option">+ Add option</button>';
+    const optWrap = card.querySelector('.cust-options');
+    const opts = Array.isArray(g.options) ? g.options : [];
+    (opts.length ? opts : [{}]).forEach(o => optWrap.appendChild(custOptionRow(o)));
+    return card;
+  }
+  custGroups.addEventListener('click', (e) => {
+    if (e.target.closest('.cust-del-group')) { e.target.closest('.cust-group').remove(); return; }
+    if (e.target.closest('.cust-del-opt')) { e.target.closest('.cust-opt').remove(); return; }
+    if (e.target.closest('.cust-add-option')) { e.target.closest('.cust-group').querySelector('.cust-options').appendChild(custOptionRow()); }
+  });
+  custGroups.addEventListener('change', (e) => {
+    if (e.target.classList.contains('cust-type')) {
+      const mw = e.target.closest('.cust-group').querySelector('.cust-max-wrap');
+      if (mw) mw.style.display = e.target.value === 'multi' ? '' : 'none';
+    }
+  });
+  custWrap.querySelector('#mi-cust-add-group').addEventListener('click', () => custGroups.appendChild(custGroupCard()));
+
+  function custSet(arr){ custGroups.innerHTML = ''; (Array.isArray(arr) ? arr : []).forEach(g => custGroups.appendChild(custGroupCard(g))); }
+  function custGet(){
+    const out = [];
+    custGroups.querySelectorAll('.cust-group').forEach(card => {
+      const title = card.querySelector('.cust-title').value.trim();
+      if (!title) return;
+      const required = card.querySelector('.cust-required').checked;
+      const multi = card.querySelector('.cust-type').value === 'multi';
+      const maxSelect = multi ? Math.max(1, Number(card.querySelector('.cust-max').value) || 1) : 1;
+      const options = [];
+      card.querySelectorAll('.cust-opt').forEach(row => {
+        const label = row.querySelector('.cust-opt-label').value.trim();
+        if (!label) return;
+        options.push({ label, extraPrice: Number(row.querySelector('.cust-opt-price').value) || 0, isVeg: row.querySelector('.cust-opt-veg-cb').checked });
+      });
+      if (options.length) out.push({ title, required, minSelect: required ? 1 : 0, maxSelect, options });
+    });
+    return out;
+  }
   let saving = false;
 
   function setFieldError(id, msg) {
@@ -197,6 +308,7 @@
     document.getElementById('mi-restaurant').value = restaurantSelect.value;
     document.getElementById('mi-inStock').checked = true;
     document.getElementById('mi-isVeg').checked = true;
+    custSet([]);
     modalTitle.textContent = 'Add menu item';
     saveText.textContent = 'Create item';
     document.getElementById('mi-image').dispatchEvent(new Event('change'));
@@ -224,6 +336,7 @@
     document.getElementById('mi-inStock').checked = !!item.inStock;
     document.getElementById('mi-isBestseller').checked = !!item.isBestseller;
     document.getElementById('mi-isRecommended').checked = !!item.isRecommended;
+    custSet(item.customizations || []);
     modalTitle.textContent = 'Edit menu item';
     saveText.textContent = 'Save changes';
     document.getElementById('mi-image').dispatchEvent(new Event('change'));
@@ -265,6 +378,7 @@
       inStock: document.getElementById('mi-inStock').checked,
       isBestseller: document.getElementById('mi-isBestseller').checked,
       isRecommended: document.getElementById('mi-isRecommended').checked,
+      customizations: custGet(),
     };
 
     saving = true;
