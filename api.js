@@ -84,14 +84,29 @@ async function apiRequest(path, { method = 'GET', body, query } = {}) {
  * only XHR exposes upload progress events (xhr.upload.onprogress).
  *
  * @param {File} file
- * @param {'restaurants'|'menu'|'categories'} type
+ * @param {'restaurants'|'menu'|'categories'|'banners'} type
  * @param {(percent: number) => void} [onProgress]
  * @returns {Promise<string>} the Cloudinary secure URL
  */
 function uploadImage(file, type, onProgress) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${API_BASE}/upload/${type}`);
+    const UPLOAD_TIMEOUT_MS = 90 * 1000;
+    let settled = false;
+
+    const fail = (message) => {
+      if (settled) return;
+      settled = true;
+      reject(new Error(message));
+    };
+    const succeed = (url) => {
+      if (settled) return;
+      settled = true;
+      resolve(url);
+    };
+
+    xhr.open('POST', `${API_BASE}/upload/${encodeURIComponent(type)}`);
+    xhr.timeout = UPLOAD_TIMEOUT_MS;
 
     const token = AdminAuth.getToken();
     if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
@@ -109,22 +124,31 @@ function uploadImage(file, type, onProgress) {
       if (xhr.status === 401) {
         AdminAuth.clearSession();
         window.location.href = 'login.html';
-        return reject(new Error('Session expired. Please log in again.'));
+        return fail('Session expired. Please log in again.');
       }
 
-      if (xhr.status >= 200 && xhr.status < 300 && data && data.success) {
-        resolve(data.data.url);
-      } else {
-        reject(new Error((data && data.message) || `Upload failed (${xhr.status}).`));
+      if (xhr.status >= 200 && xhr.status < 300 && data && data.success && data.data?.url) {
+        succeed(data.data.url);
+        return;
       }
+
+      fail((data && data.message) || `Upload failed (${xhr.status || 'no response'}).`);
+    });
+
+    xhr.addEventListener('timeout', () => {
+      fail('Image upload timed out. Please try again.');
     });
 
     xhr.addEventListener('error', () => {
-      reject(new Error('Could not reach the server. Check your connection and try again.'));
+      fail('Could not reach the upload server. Please check your connection and try again.');
+    });
+
+    xhr.addEventListener('abort', () => {
+      fail('Image upload was cancelled.');
     });
 
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('image', file, file.name || 'image');
     xhr.send(formData);
   });
 }

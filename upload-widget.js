@@ -4,8 +4,13 @@
 
   function initImageUpload(root) {
     const type = root.dataset.uploadType;
+    const supportedTypes = ['restaurants', 'menu', 'categories', 'banners'];
     const targetInput = document.getElementById(root.dataset.targetInput);
     if (!targetInput) return;
+    if (!supportedTypes.includes(type)) {
+      console.error('[Image Upload] Unsupported upload type:', type);
+      return;
+    }
 
     const preview = root.querySelector('[data-preview]');
     const emptyLabel = root.querySelector('[data-empty]');
