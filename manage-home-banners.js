@@ -14,6 +14,7 @@
   const previewBadge = document.getElementById('hb-preview-badge');
   const previewTitle = document.getElementById('hb-preview-title');
   const previewSubtitle = document.getElementById('hb-preview-subtitle');
+  const placementInput = document.getElementById('hb-placement');
 
   if (!list || !form) return;
 
@@ -97,7 +98,7 @@
   function render() {
     count.textContent = `${banners.length} banner${banners.length === 1 ? '' : 's'}`;
     if (!banners.length) {
-      list.innerHTML = `<div class="card state-block home-banner-empty"><div class="home-banner-empty-icon">＋</div><h4>No homepage banners yet</h4><p>Create your first promotional hero. The customer header will use it automatically.</p><button class="btn btn-primary" id="home-banner-empty-add">Add first banner</button></div>`;
+      list.innerHTML = `<div class="card state-block home-banner-empty"><div class="home-banner-empty-icon">＋</div><h4>No banners yet</h4><p>Create your first promotional hero. Choose Homepage or 99 Store as the placement.</p><button class="btn btn-primary" id="home-banner-empty-add">Add first banner</button></div>`;
       document.getElementById('home-banner-empty-add')?.addEventListener('click', openAdd);
       return;
     }
@@ -127,7 +128,7 @@
               <span class="home-banner-status ${cls}"><i></i>${status}</span>
             </div>
             <div class="home-banner-meta">
-              <span>Priority ${Number(b.priority || 0)}</span>
+              <span>${b.placement === 'under99' ? '99 Store' : 'Homepage'}</span><span>Priority ${Number(b.priority || 0)}</span>
               <span>${esc(b.animation || 'fade')} entrance</span>
               <span>${b.startAt || b.endAt ? `${formatDate(b.startAt)} → ${formatDate(b.endAt)}` : 'Always on when active'}</span>
             </div>
@@ -194,6 +195,7 @@
   function resetForm() {
     form.reset();
     document.getElementById('hb-id').value = '';
+    if (placementInput) placementInput.value = 'home';
     document.getElementById('hb-background').value = '#0B6B46';
     document.getElementById('hb-textColor').value = 'light';
     document.getElementById('hb-animation').value = 'fade';
@@ -220,6 +222,7 @@
     resetForm();
     clearErrors();
     document.getElementById('hb-id').value = b._id;
+    if (placementInput) placementInput.value = b.placement || 'home';
     setField('hb-title', b.title);
     setField('hb-subtitle', b.subtitle);
     setField('hb-offerText', b.offerText);
@@ -273,6 +276,7 @@
     clearErrors();
 
     const body = {
+      placement: placementInput?.value || 'home',
       title: document.getElementById('hb-title').value.trim(),
       subtitle: document.getElementById('hb-subtitle').value.trim(),
       offerText: document.getElementById('hb-offerText').value.trim(),
