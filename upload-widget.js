@@ -4,7 +4,7 @@
 
   function initImageUpload(root) {
     const type = root.dataset.uploadType;
-    const supportedTypes = ['restaurants', 'menu', 'categories', 'banners'];
+    const supportedTypes = ['restaurants', 'menu', 'categories', 'banners', 'restaurantDelivery'];
     const targetInput = document.getElementById(root.dataset.targetInput);
     if (!targetInput) return;
     if (!supportedTypes.includes(type)) {
@@ -86,6 +86,9 @@
       setProgress(0);
 
       try {
+        if (typeof window.uploadImage !== 'function' && typeof uploadImage !== 'function') {
+          throw new Error('Image upload service is not loaded. Please refresh the Admin page.');
+        }
         const url = await uploadImage(file, type, (pct) => setProgress(pct));
         targetInput.value = url;
         showImage(url);
@@ -103,8 +106,25 @@
     });
   }
 
-  document.querySelectorAll('[data-img-upload]').forEach(initImageUpload);
+  function initAllImageUploads() {
+    document.querySelectorAll('[data-img-upload]').forEach((root) => {
+      if (root.dataset.imageUploadInitialized === 'true') return;
+      root.dataset.imageUploadInitialized = 'true';
+      initImageUpload(root);
+    });
+  }
+
+  // The restaurant edit modal can be reused/opened repeatedly. Initialize
+  // existing widgets now and also expose a safe initializer for dynamically
+  // inserted widgets.
+  initAllImageUploads();
 
   // Exposed for pages that insert widget markup dynamically after page load.
-  window.initImageUpload = initImageUpload;
+  window.initImageUpload = function (root) {
+    if (!root) return;
+    if (root.dataset.imageUploadInitialized === 'true') return;
+    root.dataset.imageUploadInitialized = 'true';
+    initImageUpload(root);
+  };
+  window.initAllImageUploads = initAllImageUploads;
 })();
