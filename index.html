@@ -897,6 +897,25 @@
           <div class="error-msg" data-error-for="rm-image-4"></div>
         </div>
 
+        <div class="field">
+          <label>Restaurant menu delivery banner artwork</label>
+          <div class="img-upload" data-img-upload data-upload-type="restaurantDelivery" data-target-input="rm-deliveryBannerImage">
+            <div class="img-upload-preview" data-preview>
+              <span class="img-upload-empty" data-empty>Transparent rider artwork</span>
+            </div>
+            <label class="btn btn-ghost btn-sm img-upload-btn">
+              <span data-btn-label>Upload rider image</span>
+              <input type="file" accept="image/png,image/webp,image/jpeg" data-file-input hidden />
+            </label>
+            <div class="img-upload-progress" data-progress-wrap style="display:none;">
+              <div class="img-upload-progress-fill" data-progress-fill></div>
+            </div>
+          </div>
+          <input type="hidden" id="rm-deliveryBannerImage" />
+          <div class="hint">This artwork is loaded by the customer restaurant page from the backend. The banner layout, pink background, text and positioning remain frontend-controlled.</div>
+          <div class="error-msg" data-error-for="rm-deliveryBannerImage"></div>
+        </div>
+
         <div class="field-row">
           <div class="field">
             <label for="rm-rating">Rating (1–5)</label>

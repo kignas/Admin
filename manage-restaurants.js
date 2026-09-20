@@ -274,7 +274,12 @@
       document.getElementById('rm-freeDeliveryEnabled').checked = r.freeDeliveryEnabled !== false;
       document.getElementById('rm-freeDeliveryAbove').value = r.freeDeliveryAbove ?? '';
       document.getElementById('rm-minOrder').value = r.minOrder ?? 0;
-      document.getElementById('rm-deliveryRadiusKm').value = r.deliveryRadiusKm ?? 15;
+      document.getElementById('rm-deliveryRadiusKm').value = r.deliveryRadiusKm ?? 10;
+      const deliveryBannerInput = document.getElementById('rm-deliveryBannerImage');
+      if (deliveryBannerInput) {
+        deliveryBannerInput.value = r.deliveryBannerImage || '';
+        deliveryBannerInput.dispatchEvent(new Event('change'));
+      }
       const gallery = Array.isArray(r.images) && r.images.length ? r.images : (r.image ? [r.image] : []);
       for (let i = 1; i <= 4; i++) {
         const input = document.getElementById(`rm-image-${i}`);
@@ -385,6 +390,7 @@
 
     let valid = true;
     setFieldError('rm-name', ''); setFieldError('rm-cuisine', '');
+    setFieldError('rm-deliveryBannerImage', '');
     for (let i = 1; i <= 4; i++) setFieldError(`rm-image-${i}`, '');
 
     const name = document.getElementById('rm-name').value.trim();
@@ -421,9 +427,15 @@
       valid = false;
     }
 
-    const deliveryRadiusKm = Number(document.getElementById('rm-deliveryRadiusKm').value || 15);
-    if (!Number.isFinite(deliveryRadiusKm) || deliveryRadiusKm <= 0 || deliveryRadiusKm > 100) {
-      showToast('Delivery radius must be between 0 and 100 km.', 'error');
+    const deliveryRadiusKm = Number(document.getElementById('rm-deliveryRadiusKm').value || 10);
+    if (!Number.isFinite(deliveryRadiusKm) || deliveryRadiusKm <= 0 || deliveryRadiusKm > 10) {
+      showToast('Delivery radius must be between 0 and 10 km.', 'error');
+      valid = false;
+    }
+
+    const deliveryBannerImage = document.getElementById('rm-deliveryBannerImage').value.trim();
+    if (deliveryBannerImage && !/^https:\/\/.+/i.test(deliveryBannerImage)) {
+      setFieldError('rm-deliveryBannerImage', 'Must be a valid HTTPS image URL.');
       valid = false;
     }
 
@@ -453,7 +465,8 @@
         freeDeliveryEnabled: document.getElementById('rm-freeDeliveryEnabled').checked,
         freeDeliveryAbove: Number(document.getElementById('rm-freeDeliveryAbove').value || 0),
         minOrder: Number(document.getElementById('rm-minOrder').value || 0),
-        deliveryRadiusKm: Number(document.getElementById('rm-deliveryRadiusKm').value || 15),
+        deliveryRadiusKm: Number(document.getElementById('rm-deliveryRadiusKm').value || 10),
+        deliveryBannerImage: deliveryBannerImage,
       };
       const deliveryFee = document.getElementById('rm-deliveryFee').value;
       if (deliveryFee !== '') body.deliveryFee = Number(deliveryFee);
