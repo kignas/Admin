@@ -463,9 +463,8 @@
               <input type="text" id="restaurants-search" placeholder="Search restaurants by name…" />
             </div>
             <select id="restaurants-status-filter">
-              <option value="all">All statuses</option>
-              <option value="active">Active</option>
-              <option value="inactive">Deactivated</option>
+              <option value="active" selected>Active</option>
+              <option value="inactive">Legacy inactive</option>
             </select>
             <span class="toolbar-count" id="restaurants-count"></span>
           </div>
@@ -898,7 +897,7 @@
         </div>
 
         <div class="field">
-          <label>Restaurant menu delivery banner artwork</label>
+          <label>Delivery banner rider artwork</label>
           <div class="img-upload" data-img-upload data-upload-type="restaurantDelivery" data-target-input="rm-deliveryBannerImage">
             <div class="img-upload-preview" data-preview>
               <span class="img-upload-empty" data-empty>Transparent rider artwork</span>

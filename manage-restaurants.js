@@ -4,7 +4,7 @@
   const searchInput = document.getElementById('restaurants-search');
   const statusFilter = document.getElementById('restaurants-status-filter');
 
-  const state = { status: 'all', search: '' };
+  const state = { status: 'active', search: '' };
   let loadedOnce = false;
 
   function renderTable(restaurants) {
@@ -60,7 +60,7 @@
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/></svg>
                     </button>
                   ` : `
-                    <button class="btn btn-sm btn-ghost restaurant-restore-btn" data-id="${r.id}" data-name="${escapeHtml(r.name)}">Restore</button>
+                    <button class="btn btn-sm btn-ghost restaurant-delete-inactive-btn" data-id="${r.id}" data-name="${escapeHtml(r.name)}">Delete permanently</button>
                   `}
                 </div>
               </td>
@@ -79,8 +79,8 @@
     tableWrap.querySelectorAll('.restaurant-deactivate-btn').forEach(btn => {
       btn.addEventListener('click', () => permanentlyDeleteRestaurant(btn.dataset.id, btn.dataset.name));
     });
-    tableWrap.querySelectorAll('.restaurant-restore-btn').forEach(btn => {
-      btn.addEventListener('click', () => restoreRestaurant(btn.dataset.id, btn.dataset.name, btn));
+    tableWrap.querySelectorAll('.restaurant-delete-inactive-btn').forEach(btn => {
+      btn.addEventListener('click', () => permanentlyDeleteRestaurant(btn.dataset.id, btn.dataset.name));
     });
   }
 
@@ -90,7 +90,9 @@
       const res = await apiRequest('/admin/restaurants', {
         query: { search: state.search, status: state.status },
       });
-      const restaurants = res.data;
+      const restaurants = Array.isArray(res.data)
+        ? res.data.filter(r => state.status === 'inactive' ? r.isActive === false : r.isActive !== false)
+        : [];
       countEl.textContent = `${restaurants.length} restaurant${restaurants.length === 1 ? '' : 's'}`;
       renderTable(restaurants);
     } catch (err) {
@@ -121,24 +123,6 @@
       loadRestaurants();
     } catch (err) {
       showToast(err.message || 'Could not permanently delete restaurant.', 'error');
-    }
-  }
-
-  // Restore reuses the existing generic restaurant-update endpoint
-  // (PUT /api/restaurants/:id) rather than a new dedicated route —
-  // isActive/isOpen are ordinary fields on that document.
-  async function restoreRestaurant(id, name, btn) {
-    if (!confirm(`Restore "${name}"? It will become active and open for orders again.`)) return;
-    btn.disabled = true;
-    btn.textContent = 'Restoring…';
-    try {
-      await apiRequest(`/restaurants/${id}`, { method: 'PUT', body: { isActive: true, isOpen: true } });
-      showToast('Restaurant restored.', 'success');
-      loadRestaurants();
-    } catch (err) {
-      showToast(err.message || 'Could not restore restaurant.', 'error');
-      btn.disabled = false;
-      btn.textContent = 'Restore';
     }
   }
 
