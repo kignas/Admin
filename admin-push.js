@@ -9,8 +9,24 @@
     appId: '1:644274579271:web:ba72c4cd4f81c568fa0e62'
   };
   let started = false;
+  let acknowledged = false;
+
+  async function acknowledgeAdminNewOrders() {
+    if (acknowledged || !window.AdminAuth?.isLoggedIn || !AdminAuth.isLoggedIn()) return;
+    try {
+      const res = await fetch(CONFIG.API_BASE_URL + '/notifications/admin-new-orders/acknowledge', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + AdminAuth.getToken(), 'Content-Type': 'application/json' }
+      });
+      if (res.ok) acknowledged = true;
+    } catch (_) {}
+  }
+
   async function initAdminPush() {
     if (started || !window.AdminAuth?.isLoggedIn || !AdminAuth.isLoggedIn()) return;
+    // Opening the admin portal acknowledges all pending admin new-order alerts.
+    // This is the server-side stop signal for the repeating admin ring.
+    await acknowledgeAdminNewOrders();
     if (!('serviceWorker' in navigator) || !('Notification' in window) || !window.firebase?.messaging) return;
     try {
       if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
@@ -33,6 +49,9 @@
       messaging.onMessage(function (payload) {
         const d = payload?.data || {};
         if (d.type !== 'admin_new_order') return;
+        // The admin portal is open and has received the alert, so stop the
+        // server-side repeat ring for this admin.
+        acknowledgeAdminNewOrders();
         try {
           if (Notification.permission === 'granted') {
             new Notification(d.title || 'New order received', {
