@@ -4,5 +4,5 @@ const CONFIG = {
   // API_BASE_URL: "http://localhost:5000/api"
   
   // Production Render URL
-  API_BASE_URL: "https://eatswada.onrender.com/api"
+  API_BASE_URL: "https://api.eatswada.com/api"
 };
