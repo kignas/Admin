@@ -14,6 +14,7 @@
 <div class="app-shell">
 
   <!-- ============================== SIDEBAR ============================== -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
   <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="mark">N</div>
@@ -23,78 +24,155 @@
       </div>
     </div>
 
-    <ul class="nav-list">
-      <li>
-        <button class="nav-item active" data-view="dashboard">
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
-          Dashboard
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-view="home-banners">
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 15 5-5 4 4 3-3 6 6"/><circle cx="8" cy="8" r="1.5"/></svg></span>
-          Header &amp; Banners
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-view="create-vendor">
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5V19a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z"/><path d="M9.5 10.5h5M12 8v5"/></svg></span>
-          Create Vendor
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-view="vendor-applications">
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="M17 16h3"/></svg></span>
-          Vendor Applications
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-view="manage-vendors">
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16.5 8.3a3 3 0 1 1 0 5.9M19.5 20a5 5 0 0 0-4-4.9"/></svg></span>
-          Manage Vendors
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-view="manage-restaurants">
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5h18v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z"/><path d="M9 19.5v-6h6v6"/></svg></span>
-          Manage Restaurants
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-view="manage-categories">
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 3H5a2 2 0 0 0-2 2v7.5a2 2 0 0 0 .59 1.41l9.5 9.5a2 2 0 0 0 2.82 0l7-7a2 2 0 0 0 0-2.82l-9.5-9.5A2 2 0 0 0 12.5 3Z"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></span>
-          Manage Categories
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-view="manage-reviews"><span class="nav-icon">★</span><span>Manage Reviews</span></button>
-      <li>
-        <button class="nav-item" data-view="platform-ratings"><span class="nav-icon">★</span><span>Rate Us Feedback</span></button>
-      </li>
-                    <button class="nav-item" data-view="manage-menu">
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v18M4 3h11l-2 4 2 4H4"/><path d="M17 3v18"/><path d="M20 3v6a2 2 0 0 1-2 2"/><path d="M20 3v18"/></svg></span>
-          Manage Menu
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-view="manage-orders">
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 11h6M9 15h6"/></svg></span>
-          Manage Orders
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-view="manage-riders">
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M5.5 17.5 9 10h4l3 4.5"/><path d="M9 10 8 6h3"/><path d="M12 14h6.5"/></svg></span>
-          Manage Riders
-        </button>
-      </li>
-      <li>
-        <button class="nav-item" data-view="manage-customers">
-          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
-          Manage Customers
-        </button>
-      </li>
-    </ul>
+    <div class="nav-scroll">
+      <div class="nav-group-label">Overview</div>
+      <ul class="nav-list">
+        <li>
+          <button class="nav-item active" data-view="dashboard">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span>
+            Dashboard
+          </button>
+        </li>
+      </ul>
+
+      <div class="nav-group-label">Operations</div>
+      <ul class="nav-list">
+        <li>
+          <button class="nav-item" data-view="vendor-applications">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="M17 16h3"/></svg></span>
+            Vendor Applications
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="menu-approvals">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v13H4z"/><path d="m8.5 12 2.4 2.4L16 9.5"/></svg></span>
+            Menu Approvals
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="manage-orders">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M9 11h6M9 15h6"/></svg></span>
+            Manage Orders
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="home-banners">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m3 15 5-5 4 4 3-3 6 6"/><circle cx="8" cy="8" r="1.5"/></svg></span>
+            Header &amp; Banners
+          </button>
+        </li>
+      </ul>
+
+      <div class="nav-group-label">Partners</div>
+      <ul class="nav-list">
+        <li>
+          <button class="nav-item" data-view="create-vendor">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5V19a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5Z"/><path d="M9.5 10.5h5M12 8v5"/></svg></span>
+            Create Vendor
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="manage-vendors">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16.5 8.3a3 3 0 1 1 0 5.9M19.5 20a5 5 0 0 0-4-4.9"/></svg></span>
+            Manage Vendors
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="manage-restaurants">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 4.5 4h15L21 9.5"/><path d="M3 9.5h18v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z"/><path d="M9 19.5v-6h6v6"/></svg></span>
+            Manage Restaurants
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="manage-menu">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v18M4 3h11l-2 4 2 4H4"/><path d="M17 3v18"/><path d="M20 3v6a2 2 0 0 1-2 2"/><path d="M20 3v18"/></svg></span>
+            Manage Menu
+          </button>
+        </li>
+      </ul>
+
+      <div class="nav-group-label">Catalog &amp; feedback</div>
+      <ul class="nav-list">
+        <li>
+          <button class="nav-item" data-view="manage-categories">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 3H5a2 2 0 0 0-2 2v7.5a2 2 0 0 0 .59 1.41l9.5 9.5a2 2 0 0 0 2.82 0l7-7a2 2 0 0 0 0-2.82l-9.5-9.5A2 2 0 0 0 12.5 3Z"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></span>
+            Manage Categories
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="manage-reviews">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.8Z"/></svg></span>
+            Manage Reviews
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="platform-ratings">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></span>
+            Rate Us Feedback
+          </button>
+        </li>
+      </ul>
+
+      <div class="nav-group-label">People</div>
+      <ul class="nav-list">
+        <li>
+          <button class="nav-item" data-view="manage-riders">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M5.5 17.5 9 10h4l3 4.5"/><path d="M9 10 8 6h3"/><path d="M12 14h6.5"/></svg></span>
+            Manage Riders
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="manage-customers">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
+            Manage Customers
+          </button>
+        </li>
+      </ul>
+
+      <div class="nav-group-label">Business</div>
+      <ul class="nav-list">
+        <li>
+          <button class="nav-item" data-view="settlements">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M17 7.5c0-1.9-2.2-3-5-3s-5 1.1-5 3 2.2 2.7 5 3 5 1.1 5 3-2.2 3-5 3-5-1.1-5-3"/></svg></span>
+            Settlements &amp; Payouts
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="coupons">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 0 0 8v3h16v-3a2 2 0 0 1 0-8V5H4Z"/><path d="M12 8v.01M12 12v.01M12 16v.01"/></svg></span>
+            Offers &amp; Coupons
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="support">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z"/></svg></span>
+            Support Tickets
+          </button>
+        </li>
+      </ul>
+
+      <div class="nav-group-label">Insights</div>
+      <ul class="nav-list">
+        <li>
+          <button class="nav-item" data-view="analytics">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M21 20H3"/></svg></span>
+            Analytics &amp; Reports
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="notifications">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7"/><path d="M10.5 20a2 2 0 0 0 3 0"/></svg></span>
+            Notifications
+          </button>
+        </li>
+        <li>
+          <button class="nav-item" data-view="admin-settings">
+            <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg></span>
+            Admin Settings
+          </button>
+        </li>
+      </ul>
+    </div>
 
     <div class="sidebar-footer">
       <div class="sidebar-admin">
@@ -118,9 +196,15 @@
   <!-- ================================ MAIN ================================ -->
   <div class="main">
     <header class="topbar">
-      <div>
+      <button class="hamburger" id="sidebar-toggle" aria-label="Open navigation" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div class="topbar-titles">
         <h1 id="page-title">Dashboard</h1>
-        <div class="sub" id="page-sub">Live snapshot of the Nearbite ops today</div>
+        <div class="sub" id="page-sub">Live snapshot of the Eatswada operations</div>
+      </div>
+      <div class="topbar-right">
+        <span class="env-chip" id="env-chip" title="Active API host">Render</span>
       </div>
     </header>
 
@@ -128,14 +212,58 @@
 
       <!-- ── Dashboard ─────────────────────────────────────────── -->
       <section class="view active" id="view-dashboard">
+        <div class="view-head dash-head">
+          <div>
+            <h2>Operational overview</h2>
+            <div class="sub">Live figures from the Render backend · no demo data</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="dashboard-refresh">↻ Refresh</button>
+        </div>
+
+        <div class="card dash-error" id="dashboard-error" style="display:none;">
+          <div class="dash-error-icon">!</div>
+          <div>
+            <strong>Some dashboard data could not be loaded</strong>
+            <p id="dashboard-error-msg">The backend did not respond. There is no fallback host — retry when Render is reachable.</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="dashboard-retry">Retry</button>
+        </div>
+
         <div class="stat-grid" id="stat-grid">
-          <!-- stat cards injected by dashboard.js -->
+          <div class="card stat-card"><div class="stat-label">Loading…</div><div class="stat-value mono">—</div></div>
+          <div class="card stat-card"><div class="stat-label">Loading…</div><div class="stat-value mono">—</div></div>
+          <div class="card stat-card"><div class="stat-label">Loading…</div><div class="stat-value mono">—</div></div>
+          <div class="card stat-card"><div class="stat-label">Loading…</div><div class="stat-value mono">—</div></div>
+        </div>
+
+        <div class="dash-two-col">
+          <div class="card panel">
+            <div class="panel-head">
+              <h3>Alerts &amp; review queues</h3>
+            </div>
+            <div id="dashboard-alerts"><div class="state-block"><div class="spinner-lg"></div></div></div>
+          </div>
+          <div class="card panel">
+            <div class="panel-head">
+              <h3>Quick actions</h3>
+            </div>
+            <div id="dashboard-quick-actions"></div>
+          </div>
+        </div>
+
+        <div class="card panel dash-chart-panel">
+          <div class="panel-head">
+            <h3>Orders &amp; revenue over time</h3>
+            <span class="chart-range mono" id="revenue-range">—</span>
+          </div>
+          <div id="revenue-chart-wrap"><div class="state-block"><div class="spinner-lg"></div></div></div>
         </div>
 
         <div class="panel-grid">
           <div class="card panel">
             <div class="panel-head">
               <h3>Recent orders</h3>
+              <button class="btn btn-ghost btn-sm" data-goto="manage-orders">View all</button>
             </div>
             <div id="recent-orders-wrap">
               <div class="state-block"><div class="spinner-lg"></div></div>
@@ -412,10 +540,16 @@
         </div>
         <div class="card mgmt-card">
           <div class="toolbar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="applications-search" placeholder="Search restaurant, owner, email, phone…" />
+            </div>
             <select id="applications-status-filter" aria-label="Application status">
-              <option value="pending">Pending</option>
+              <option value="pending" selected>Pending</option>
+              <option value="needs_changes">Changes requested</option>
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
+              <option value="all">All statuses</option>
             </select>
             <span class="toolbar-count" id="applications-count"></span>
           </div>
@@ -541,7 +675,10 @@
               <option value="placed">Placed</option>
               <option value="confirmed">Confirmed</option>
               <option value="preparing">Preparing</option>
+              <option value="waiting_for_rider">Waiting for rider</option>
+              <option value="assigned">Assigned</option>
               <option value="out_for_delivery">Out for delivery</option>
+              <option value="otp_verified">OTP verified</option>
               <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
             </select>
@@ -625,6 +762,271 @@
             <span class="pagination-info" id="customers-page-info"></span>
             <div class="pagination" id="customers-pagination"></div>
           </div>
+        </div>
+      </section>
+
+      <!-- ── Menu Item Approvals ─────────────────────────────── -->
+      <section class="view" id="view-menu-approvals">
+        <div class="view-head">
+          <div>
+            <h2>Menu Item Approvals</h2>
+            <div class="sub">Vendor-created menu items stay hidden from customers until approved here.</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="menu-approvals-refresh">↻ Refresh</button>
+        </div>
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="menu-approvals-search" placeholder="Search pending items or restaurants…" />
+            </div>
+            <select id="menu-approvals-restaurant-filter">
+              <option value="">All restaurants</option>
+            </select>
+            <span class="toolbar-count" id="menu-approvals-count"></span>
+          </div>
+          <div class="table-wrap" id="menu-approvals-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Settlements & Payouts ────────────────────────────── -->
+      <section class="view" id="view-settlements">
+        <div class="view-head">
+          <div>
+            <h2>Settlements &amp; Payouts</h2>
+            <div class="sub">Ledger entries, platform commission and vendor payouts — every figure below comes from the backend ledger.</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="settlements-refresh">↻ Refresh</button>
+        </div>
+
+        <div class="tabs" id="settlements-tabs">
+          <button class="tab active" data-tab="ledger">Ledger</button>
+          <button class="tab" data-tab="payouts">Payout requests</button>
+        </div>
+
+        <div class="card integ-card" id="ledger-integrity">
+          <div class="state-block"><div class="spinner-lg"></div></div>
+        </div>
+
+        <div class="settlements-tab-panel" id="settlements-panel-ledger">
+          <div class="card mgmt-card">
+            <div class="toolbar">
+              <select id="ledger-status-filter">
+                <option value="">All statuses</option>
+                <option value="eligible">Eligible</option>
+                <option value="reserved">Reserved (payout requested)</option>
+                <option value="settled">Settled</option>
+                <option value="void">Void</option>
+              </select>
+              <span class="toolbar-count" id="ledger-count"></span>
+              <div class="toolbar-actions">
+                <button class="btn btn-ghost btn-sm" id="ledger-rebuild-btn" title="Backfill missing ledger entries from delivered, paid orders">Rebuild ledger</button>
+                <button class="btn btn-primary btn-sm" id="ledger-settle-btn" disabled>Settle selected</button>
+              </div>
+            </div>
+            <div class="table-wrap" id="ledger-table-wrap">
+              <div class="state-block"><div class="spinner-lg"></div></div>
+            </div>
+            <div class="table-footer" id="ledger-footer" style="display:none;">
+              <span class="pagination-info" id="ledger-page-info"></span>
+              <div class="pagination" id="ledger-pagination"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settlements-tab-panel" id="settlements-panel-payouts" style="display:none;">
+          <div class="card mgmt-card">
+            <div class="toolbar">
+              <select id="payout-status-filter">
+                <option value="">All statuses</option>
+                <option value="requested">Requested</option>
+                <option value="processing">Processing</option>
+                <option value="paid">Paid</option>
+                <option value="rejected">Rejected</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <span class="toolbar-count" id="payouts-count"></span>
+            </div>
+            <div class="table-wrap" id="payouts-table-wrap">
+              <div class="state-block"><div class="spinner-lg"></div></div>
+            </div>
+            <div class="table-footer" id="payouts-footer" style="display:none;">
+              <span class="pagination-info" id="payouts-page-info"></span>
+              <div class="pagination" id="payouts-pagination"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Offers & Coupons ─────────────────────────────────── -->
+      <section class="view" id="view-coupons">
+        <div class="view-head">
+          <div>
+            <h2>Offers &amp; Coupons</h2>
+            <div class="sub">Platform discount codes. Creation requires the backend <code>coupons.manage</code> permission.</div>
+          </div>
+          <div class="view-head-actions">
+            <button class="btn btn-ghost btn-sm" id="coupons-refresh">↻ Refresh</button>
+            <button class="btn btn-primary btn-sm" id="coupon-add-btn">+ Create coupon</button>
+          </div>
+        </div>
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="coupons-search" placeholder="Search by code…" />
+            </div>
+            <select id="coupons-status-filter">
+              <option value="">All coupons</option>
+              <option value="active">Active</option>
+              <option value="inactive">Paused</option>
+            </select>
+            <span class="toolbar-count" id="coupons-count"></span>
+          </div>
+          <div class="table-wrap" id="coupons-table-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Support Tickets ──────────────────────────────────── -->
+      <section class="view" id="view-support">
+        <div class="view-head">
+          <div>
+            <h2>Support Tickets</h2>
+            <div class="sub">Vendor support conversations with full history, replies and status flow.</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="support-refresh">↻ Refresh</button>
+        </div>
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="support-search" placeholder="Search subject, ticket #, vendor…" />
+            </div>
+            <select id="support-status-filter">
+              <option value="">All statuses</option>
+              <option value="open">Open</option>
+              <option value="waiting_vendor">Waiting vendor</option>
+              <option value="waiting_admin">Waiting admin</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+            <select id="support-priority-filter">
+              <option value="">All priorities</option>
+              <option value="urgent">Urgent</option>
+              <option value="high">High</option>
+              <option value="normal">Normal</option>
+              <option value="low">Low</option>
+            </select>
+            <span class="toolbar-count" id="support-count"></span>
+          </div>
+          <div class="table-wrap" id="support-table-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+          <div class="table-footer" id="support-footer" style="display:none;">
+            <span class="pagination-info" id="support-page-info"></span>
+            <div class="pagination" id="support-pagination"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Analytics & Reports ──────────────────────────────── -->
+      <section class="view" id="view-analytics">
+        <div class="view-head">
+          <div>
+            <h2>Analytics &amp; Reports</h2>
+            <div class="sub">Revenue and restaurant performance aggregated by the backend.</div>
+          </div>
+          <div class="view-head-actions">
+            <select id="analytics-period" aria-label="Date range">
+              <option value="14d">Last 14 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" id="analytics-refresh">↻ Refresh</button>
+          </div>
+        </div>
+
+        <div class="stat-grid" id="analytics-stat-grid">
+          <div class="card stat-card"><div class="stat-label">Loading…</div><div class="stat-value mono">—</div></div>
+          <div class="card stat-card"><div class="stat-label">Loading…</div><div class="stat-value mono">—</div></div>
+          <div class="card stat-card"><div class="stat-label">Loading…</div><div class="stat-value mono">—</div></div>
+          <div class="card stat-card"><div class="stat-label">Loading…</div><div class="stat-value mono">—</div></div>
+        </div>
+
+        <div class="card panel dash-chart-panel">
+          <div class="panel-head">
+            <h3>Daily revenue</h3>
+            <span class="chart-range mono" id="analytics-range">—</span>
+          </div>
+          <div id="analytics-chart-wrap"><div class="state-block"><div class="spinner-lg"></div></div></div>
+        </div>
+
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <strong>Top restaurants</strong>
+            <span class="toolbar-count">All-time delivered orders</span>
+          </div>
+          <div class="table-wrap" id="top-restaurants-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Notifications ────────────────────────────────────── -->
+      <section class="view" id="view-notifications">
+        <div class="view-head">
+          <div>
+            <h2>Notifications</h2>
+            <div class="sub">Notifications delivered to this admin account, including new-order alerts.</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="notifications-refresh">↻ Refresh</button>
+        </div>
+        <div class="card mgmt-card">
+          <div class="toolbar">
+            <select id="notifications-filter">
+              <option value="">All notifications</option>
+              <option value="unread">Unread only</option>
+              <option value="read">Read only</option>
+            </select>
+            <span class="toolbar-count" id="notifications-count"></span>
+          </div>
+          <div id="notifications-list-wrap">
+            <div class="state-block"><div class="spinner-lg"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Admin Settings ───────────────────────────────────── -->
+      <section class="view" id="view-admin-settings">
+        <div class="view-head">
+          <div>
+            <h2>Admin Settings</h2>
+            <div class="sub">Your account, access permissions and platform configuration stored on the backend.</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="admin-settings-refresh">↻ Refresh</button>
+        </div>
+
+        <div class="dash-two-col">
+          <div class="card panel">
+            <div class="panel-head"><h3>Signed-in account</h3></div>
+            <div id="settings-account"><div class="state-block"><div class="spinner-lg"></div></div></div>
+          </div>
+          <div class="card panel">
+            <div class="panel-head"><h3>My permissions</h3></div>
+            <div id="settings-permissions"><div class="state-block"><div class="spinner-lg"></div></div></div>
+          </div>
+        </div>
+
+        <div class="card panel" style="margin-top:16px;">
+          <div class="panel-head">
+            <h3>Platform settings</h3>
+            <span class="toolbar-count">GET /api/platform/settings</span>
+          </div>
+          <div id="settings-platform"><div class="state-block"><div class="spinner-lg"></div></div></div>
         </div>
       </section>
 
@@ -945,6 +1347,49 @@
           <div class="field">
             <label for="rm-deliveryRadiusKm">Delivery radius (km)</label>
             <input type="number" id="rm-deliveryRadiusKm" min="0" max="100" step="0.1" />
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--border,#e5e7eb);margin:20px 0;" />
+
+        <div class="form-section">
+          <div class="form-section-title">Delivery &amp; operational settings (Admin only)</div>
+          <div class="field-grid-2">
+            <div class="field">
+              <label for="rm-businessType">Business type</label>
+              <select id="rm-businessType">
+                <option value="restaurant">Restaurant</option>
+                <option value="cloud_kitchen">Cloud kitchen</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="rm-deliveryMode">Delivery mode</label>
+              <select id="rm-deliveryMode">
+                <option value="eatswada_rider">Eatswada delivery</option>
+                <option value="self_delivery">Self delivery</option>
+              </select>
+              <div class="hint">Changing the delivery mode resets commission to the standard plan rate for that mode.</div>
+            </div>
+            <div class="field">
+              <label>Commission plan</label>
+              <div id="rm-commission-plan" class="row-sub">—</div>
+              <div class="hint">Set automatically from the delivery mode, or “custom” when a rate is overridden.</div>
+            </div>
+            <div class="field">
+              <label for="rm-maxActiveOrders">Max active orders</label>
+              <input type="number" id="rm-maxActiveOrders" min="1" max="500" step="1" />
+            </div>
+            <div class="field">
+              <label for="rm-settlementSchedule">Settlement schedule</label>
+              <select id="rm-settlementSchedule">
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+            <div class="field" style="justify-content:flex-end;">
+              <button type="button" class="btn btn-ghost btn-sm" id="rm-delivery-settings-save">Save delivery settings</button>
+              <div class="modal-result" id="rm-delivery-settings-result"></div>
+            </div>
           </div>
         </div>
 
@@ -1290,6 +1735,13 @@
 <script src="manage-home-banners.js"></script>
 <script src="manage-menu.js"></script>
 <script src="manage-riders.js"></script>
+<script src="menu-approvals.js"></script>
+<script src="manage-settlements.js"></script>
+<script src="manage-coupons.js"></script>
+<script src="manage-support.js"></script>
+<script src="manage-analytics.js"></script>
+<script src="manage-notifications.js"></script>
+<script src="admin-settings.js"></script>
 <script src="admin-push.js"></script>
 </body>
   </html>

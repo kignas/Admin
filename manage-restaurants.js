@@ -7,6 +7,19 @@
   const state = { status: 'active', search: '' };
   let loadedOnce = false;
 
+  // Real backend field (Restaurant.approvalStatus): pending | approved | rejected | suspended.
+  function approvalBadge(r) {
+    const map = {
+      approved: ['badge-success', 'Approved'],
+      pending: ['badge-warning', 'Pending review'],
+      rejected: ['badge-danger', 'Rejected'],
+      suspended: ['badge-danger', 'Suspended'],
+    };
+    const [cls, label] = map[r.approvalStatus] || (r.approvalStatus ? ['badge-muted', r.approvalStatus] : ['badge-muted', '—']);
+    const title = r.rejectionReason ? ` title="${escapeHtml(r.rejectionReason)}"` : '';
+    return `<span class="badge ${cls}"${title}>${label}</span>`;
+  }
+
   function renderTable(restaurants) {
     if (!restaurants.length) {
       tableWrap.innerHTML = `<div class="state-block">
@@ -20,7 +33,7 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Restaurant</th><th>Homepage</th><th>Owner</th><th>Cuisine</th><th>Rating</th><th>Orders</th><th>Commission</th><th>Status</th><th></th>
+            <th>Restaurant</th><th>Homepage</th><th>Owner</th><th>Cuisine</th><th>Rating</th><th>Orders</th><th>Commission</th><th>Approval</th><th>Joined</th><th>Status</th><th></th>
           </tr>
         </thead>
         <tbody>
@@ -42,6 +55,8 @@
               <td class="mono">${r.rating != null ? r.rating.toFixed(1) : '—'} ★</td>
               <td class="mono">${r.totalOrders ?? 0}</td>
               <td class="mono">${Number(r.commissionRate ?? 15).toFixed(2).replace(/\.00$/, '')}%</td>
+              <td>${approvalBadge(r)}</td>
+              <td class="mono">${r.createdAt ? formatDate(r.createdAt) : '—'}</td>
               <td>
                 ${r.isActive
                   ? `<label class="switch" title="${r.isOpen ? 'Close restaurant' : 'Open restaurant'}">
@@ -227,6 +242,7 @@
     availabilityResultBox.className = 'modal-result';
     document.getElementById('rm-id').value = id;
     openModal('restaurant-modal');
+    loadDeliverySettings(id);
 
     // The admin list view is a flattened summary — fetch the full document
     // (public GET, reused rather than duplicated) so fields like fees are available to edit.
@@ -365,6 +381,80 @@
     } finally {
       commissionSaveBtn.disabled = false;
       commissionSaveBtn.textContent = oldText;
+    }
+  });
+
+  // ── Delivery & operational settings (GET/PATCH /admin/restaurants/:id/delivery-settings) ──
+  const dsResult = document.getElementById('rm-delivery-settings-result');
+  const dsSaveBtn = document.getElementById('rm-delivery-settings-save');
+  let savingDeliverySettings = false;
+
+  async function loadDeliverySettings(id) {
+    const planEl = document.getElementById('rm-commission-plan');
+    const maxInput = document.getElementById('rm-maxActiveOrders');
+    const scheduleSelect = document.getElementById('rm-settlementSchedule');
+    dsResult.className = 'modal-result';
+    planEl.textContent = '—';
+    maxInput.value = '';
+    try {
+      const res = await apiRequest(`/admin/restaurants/${id}/delivery-settings`);
+      const d = res.data || {};
+      document.getElementById('rm-businessType').value = d.businessType || 'restaurant';
+      document.getElementById('rm-deliveryMode').value = d.deliveryMode || 'eatswada_rider';
+      document.getElementById('rm-deliveryMode').dataset.original = d.deliveryMode || 'eatswada_rider';
+      planEl.textContent = `${d.commissionPlan || '—'} · ${Number(d.commissionRate ?? 15)}%`;
+      maxInput.value = d.maxActiveOrders ?? '';
+      scheduleSelect.value = d.settlementSchedule || 'weekly';
+    } catch (err) {
+      planEl.textContent = '—';
+      dsResult.textContent = err.message || 'Could not load delivery settings.';
+      dsResult.className = 'modal-result show error';
+    }
+  }
+
+  dsSaveBtn.addEventListener('click', async () => {
+    if (savingDeliverySettings) return;
+    const id = document.getElementById('rm-id').value;
+    const businessType = document.getElementById('rm-businessType').value;
+    const deliveryMode = document.getElementById('rm-deliveryMode').value;
+    const maxActiveOrders = Number(document.getElementById('rm-maxActiveOrders').value);
+    const settlementSchedule = document.getElementById('rm-settlementSchedule').value;
+    dsResult.className = 'modal-result';
+
+    if (!Number.isInteger(maxActiveOrders) || maxActiveOrders < 1 || maxActiveOrders > 500) {
+      dsResult.textContent = 'Max active orders must be an integer between 1 and 500.';
+      dsResult.className = 'modal-result show error';
+      return;
+    }
+
+    const planChanged = document.getElementById('rm-deliveryMode').dataset.original !== deliveryMode;
+    const msg = `Save delivery & operational settings?\n\nBusiness type: ${businessType}\nDelivery mode: ${deliveryMode}\nMax active orders: ${maxActiveOrders}\nSettlement schedule: ${settlementSchedule}` +
+      (planChanged ? '\n\nChanging the delivery mode resets the commission rate to the standard plan rate for that mode.' : '');
+    if (!confirm(msg)) return;
+
+    savingDeliverySettings = true;
+    dsSaveBtn.disabled = true;
+    const oldLabel = dsSaveBtn.textContent;
+    dsSaveBtn.textContent = 'Saving…';
+    try {
+      const res = await apiRequest(`/admin/restaurants/${id}/delivery-settings`, {
+        method: 'PATCH',
+        body: { businessType, deliveryMode, maxActiveOrders, settlementSchedule },
+      });
+      const d = res.data || {};
+      document.getElementById('rm-commission-plan').textContent = `${d.commissionPlan || '—'} · ${Number(d.commissionRate ?? 15)}%`;
+      document.getElementById('rm-deliveryMode').dataset.original = d.deliveryMode || deliveryMode;
+      dsResult.textContent = res.message || 'Delivery settings updated.';
+      dsResult.className = 'modal-result show success';
+      showToast(res.message || 'Delivery settings updated.', 'success');
+      loadRestaurants();
+    } catch (err) {
+      dsResult.textContent = err.message || 'Could not update delivery settings.';
+      dsResult.className = 'modal-result show error';
+    } finally {
+      savingDeliverySettings = false;
+      dsSaveBtn.disabled = false;
+      dsSaveBtn.textContent = oldLabel;
     }
   });
 
