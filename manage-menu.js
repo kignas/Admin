@@ -45,6 +45,14 @@
   }
 
   // ── Menu table for the selected restaurant ──
+  // Real backend field (MenuItem.approvalStatus): pending | approved | rejected.
+  function approvalBadge(item) {
+    const map = { approved: ['badge-success', 'Approved'], pending: ['badge-warning', 'Pending'], rejected: ['badge-danger', 'Rejected'] };
+    const [cls, label] = map[item.approvalStatus] || ['badge-muted', '—'];
+    const title = item.rejectionReason ? ` title="${escapeHtml(item.rejectionReason)}"` : '';
+    return `<span class="badge ${cls}"${title}>${label}</span>`;
+  }
+
   function renderTable(items) {
     countEl.textContent = items.length ? `${items.length} item${items.length === 1 ? '' : 's'}` : '';
 
@@ -62,7 +70,7 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Veg</th><th>Tags</th><th>In stock</th><th></th>
+            <th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Veg</th><th>Tags</th><th>In stock</th><th>Approval</th><th></th>
           </tr>
         </thead>
         <tbody>
@@ -75,6 +83,11 @@
               </td>
               <td>
                 <div class="row-name">${escapeHtml(item.name)}</div>
+                ${item.approvalStatus === 'rejected' && item.rejectionReason
+                  ? `<div class="row-sub">Rejected: ${escapeHtml(item.rejectionReason)}</div>`
+                  : item.approvalStatus === 'pending'
+                    ? `<div class="row-sub">Waiting for admin approval — not visible to customers</div>`
+                    : ''}
               </td>
               <td>${escapeHtml(item.category || '—')}</td>
               <td class="mono">
@@ -90,6 +103,7 @@
                   <span class="track"></span>
                 </label>
               </td>
+              <td>${approvalBadge(item)}</td>
               <td>
                 <div class="row-actions">
                   <button class="icon-btn menu-item-edit-btn" data-id="${item._id}" title="Edit item">

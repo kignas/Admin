@@ -57,7 +57,7 @@ async function apiRequest(path, { method = 'GET', body, query } = {}) {
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch (networkErr) {
-    throw new Error('Could not reach the server. Check your connection and try again.');
+    throw new Error(`Could not reach the Eatswada API at ${API_BASE}. Check your connection and try again — there is no fallback host.`);
   }
 
   let data = null;
@@ -72,7 +72,11 @@ async function apiRequest(path, { method = 'GET', body, query } = {}) {
   }
 
   if (!res.ok || data?.success === false) {
-    throw new Error(data?.message || `Request failed (${res.status}).`);
+    let message = data?.message || `Request failed (${res.status}).`;
+    if (res.status === 500) {
+      message += ` — the backend at ${API_BASE} returned HTTP 500. The service may be cold-starting, unavailable, or rejecting this origin (CORS). No fallback host is used.`;
+    }
+    throw new Error(message);
   }
 
   return data;
@@ -140,7 +144,7 @@ function uploadImage(file, type, onProgress) {
     });
 
     xhr.addEventListener('error', () => {
-      fail('Could not reach the upload server. Please check your connection and try again.');
+      fail(`Could not reach the upload server at ${API_BASE}. Check your connection and try again.`);
     });
 
     xhr.addEventListener('abort', () => {
