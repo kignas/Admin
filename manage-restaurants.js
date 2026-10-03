@@ -5,6 +5,7 @@
   const statusFilter = document.getElementById('restaurants-status-filter');
 
   const state = { status: 'active', search: '' };
+  let loadedOnce = false;
 
   // Real backend field (Restaurant.approvalStatus): pending | approved | rejected | suspended.
   function approvalBadge(r) {
@@ -571,10 +572,10 @@
     loadRestaurants();
   });
 
-  // Always refresh from the configured backend whenever this view is opened.
-  // This prevents a previously rendered list from lingering after records are
-  // removed or changed in the database while the Admin page remains open.
   document.addEventListener('admin:view-changed', (e) => {
-    if (e.detail.view === 'manage-restaurants') loadRestaurants();
+    if (e.detail.view === 'manage-restaurants' && !loadedOnce) {
+      loadedOnce = true;
+      loadRestaurants();
+    }
   });
 })();
