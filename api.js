@@ -36,7 +36,7 @@ const AdminAuth = {
  * - Throws an Error with a readable .message on any non-2xx response.
  * - On 401, clears the session and bounces to login (token expired/invalid).
  */
-async function apiRequest(path, { method = 'GET', body, query } = {}) {
+async function apiRequest(path, { method = 'GET', body, query, cache = 'default' } = {}) {
   let url = `${API_BASE}${path}`;
   if (query) {
     const qs = new URLSearchParams(
@@ -54,6 +54,7 @@ async function apiRequest(path, { method = 'GET', body, query } = {}) {
     res = await fetch(url, {
       method,
       headers,
+      cache,
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch (networkErr) {

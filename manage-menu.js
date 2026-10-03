@@ -19,27 +19,51 @@
   // Note the response is the flattened admin summary shape (id, not _id),
   // same as manage-restaurants.js consumes.
   async function loadRestaurants() {
+    // Clear the old options immediately: a deleted restaurant must never remain
+    // selectable while a fresh server response is loading or after a failed fetch.
+    const previousId = restaurantSelect.value;
+    restaurantSelect.innerHTML = '<option value="">Loading restaurants…</option>';
+    modalRestaurantSelect.innerHTML = '<option value="">Loading restaurants…</option>';
+    restaurantSelect.disabled = true;
+    modalRestaurantSelect.disabled = true;
+    addBtn.disabled = true;
+    currentItems = [];
     try {
-      const res = await apiRequest('/admin/restaurants', { query: { status: 'all' } });
-      const restaurants = res.data || [];
-
+      const res = await apiRequest('/admin/restaurants', { query: { status: 'all' }, cache: 'no-store' });
+      if (!Array.isArray(res.data)) throw new Error('The server returned an invalid restaurant list.');
+      // Only use the live API response. No local/demo fallback is permitted.
+      const restaurants = res.data.filter(r => r && r.id && r.name && r.isActive !== false);
       const options = restaurants
-        .map(r => `<option value="${r.id}">${escapeHtml(r.name)}</option>`)
+        .map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`)
         .join('');
 
       restaurantSelect.innerHTML = `<option value="">Select a restaurant…</option>${options}`;
-      modalRestaurantSelect.innerHTML = options;
+      modalRestaurantSelect.innerHTML = `<option value="">Select a restaurant…</option>${options}`;
       restaurantsLoaded = true;
+      restaurantSelect.disabled = false;
+      modalRestaurantSelect.disabled = false;
 
-      // A vendor's scoped list comes back with exactly one restaurant —
-      // select it automatically rather than leaving them to pick from a
-      // single-option dropdown.
-      if (restaurants.length === 1) {
+      // Keep the prior selection only if the current API still returns it.
+      const selected = restaurants.find(r => String(r.id) === String(previousId));
+      if (selected) {
+        restaurantSelect.value = selected.id;
+        addBtn.disabled = false;
+        await loadMenu(selected.id);
+      } else if (restaurants.length === 1) {
         restaurantSelect.value = restaurants[0].id;
         addBtn.disabled = false;
-        loadMenu(restaurants[0].id);
+        await loadMenu(restaurants[0].id);
+      } else {
+        restaurantSelect.value = '';
+        await loadMenu('');
       }
     } catch (err) {
+      restaurantsLoaded = false;
+      restaurantSelect.innerHTML = '<option value="">Could not load restaurants</option>';
+      modalRestaurantSelect.innerHTML = '<option value="">Could not load restaurants</option>';
+      restaurantSelect.disabled = true;
+      modalRestaurantSelect.disabled = true;
+      await loadMenu('');
       showToast(err.message || 'Could not load restaurants.', 'error');
     }
   }
@@ -424,12 +448,15 @@
 
   addBtn.addEventListener('click', openAddModal);
 
+  document.addEventListener('admin:restaurants-changed', () => {
+    loadRestaurants();
+  });
+
   document.addEventListener('admin:view-changed', (e) => {
     if (e.detail.view !== 'manage-menu') return;
-    if (!restaurantsLoaded) loadRestaurants();
-    if (!loadedOnce) {
-      loadedOnce = true;
-      loadMenu(restaurantSelect.value);
-    }
+    // Refresh on every visit so deleted/renamed restaurants cannot survive in
+    // a long-lived admin tab. The API is the sole source of truth.
+    loadRestaurants();
+    loadedOnce = true;
   });
 })();

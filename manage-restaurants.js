@@ -135,9 +135,16 @@
     try {
       await apiRequest(`/restaurants/${id}`, { method: 'DELETE' });
       showToast('Restaurant permanently deleted.', 'success');
-      loadRestaurants();
+      await loadRestaurants();
+      // Keep the menu selector in sync when an admin deletes from this page.
+      document.dispatchEvent(new CustomEvent('admin:restaurants-changed'));
     } catch (err) {
-      showToast(err.message || 'Could not permanently delete restaurant.', 'error');
+      const message = /not found|404/i.test(err.message || '')
+        ? 'This restaurant no longer exists on the connected server. The list has been refreshed.'
+        : (err.message || 'Could not permanently delete restaurant.');
+      showToast(message, 'error');
+      await loadRestaurants();
+      document.dispatchEvent(new CustomEvent('admin:restaurants-changed'));
     }
   }
 
