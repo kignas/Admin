@@ -9,17 +9,22 @@ firebase.initializeApp({
 const messaging=firebase.messaging();
 messaging.onBackgroundMessage(function(payload){
   const d=payload?.data||{};
-  self.registration.showNotification(d.title||'New order received',{
-    body:d.body||'A new order needs attention.', icon:'../icon-192.png', badge:'../icon-192.png',
-    tag:d.orderId?'admin-order-'+d.orderId:'admin-order', renotify:true, requireInteraction:true, data:d,
-    vibrate:[400,200,400,200,400]
+  const isApplication = d.type === 'admin_new_application';
+  if (!isApplication && d.type !== 'admin_new_order') return;
+  self.registration.showNotification(d.title||(isApplication?'New restaurant application':'New order received'),{
+    body:d.body||(isApplication?'A restaurant application needs review.':'A new order needs attention.'), icon:'../icon-192.png', badge:'../icon-192.png',
+    tag:isApplication?'admin-application-'+(d.applicationId||'new'):(d.orderId?'admin-order-'+d.orderId:'admin-order'),
+    renotify:true, requireInteraction:true, data:d, vibrate:[400,200,400,200,400]
   });
 });
 self.addEventListener('notificationclick',function(event){
   event.notification.close();
-  const id=(event.notification.data||{}).orderId||'';
+  const data=event.notification.data||{};
+  const isApplication=data.type==='admin_new_application';
+  const id=isApplication?(data.applicationId||''):(data.orderId||'');
+  const target=isApplication?'vendor-applications':'orders';
   event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(function(list){
-    for(const c of list){ if('focus' in c){ c.postMessage({type:'admin-order-notification-click',orderId:id}); return c.focus(); } }
-    return clients.openWindow('../index.html#manage-orders');
+    for(const c of list){ if('focus' in c){ c.postMessage({type:isApplication?'admin-application-notification-click':'admin-order-notification-click',applicationId:isApplication?id:'',orderId:isApplication?'':id}); return c.focus(); } }
+    return clients.openWindow('../index.html#'+target);
   }));
 });

@@ -726,3 +726,11 @@ table.data-table {
 .modal-result.show { display: block; }
 .modal-result.success { color: var(--success); }
 .modal-result.error { color: var(--danger); }
+
+/* Unread notification count in the Admin sidebar */
+.nav-item .notification-nav-badge {
+  margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px;
+  border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  background: #dc2626; color: #fff; font-size: 11px; font-weight: 700; line-height: 1;
+}
+.nav-item .notification-nav-badge[hidden] { display: none; }

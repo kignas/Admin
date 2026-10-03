@@ -369,6 +369,8 @@
     }
   }
 
+  window.refreshVendorApplications = () => load();
+
   filter?.addEventListener('change', () => { state.status = filter.value; state.page = 1; load(); });
   searchInput?.addEventListener('input', debounce(() => {
     state.search = searchInput.value.trim();

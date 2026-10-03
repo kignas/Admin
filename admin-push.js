@@ -49,20 +49,32 @@
       started = true;
       messaging.onMessage(function (payload) {
         const d = payload?.data || {};
-        if (d.type !== 'admin_new_order') return;
-        // The admin portal is open and has received the alert, so stop the
-        // server-side repeat ring for this admin.
-        acknowledgeAdminNewOrders();
+        if (d.type !== 'admin_new_order' && d.type !== 'admin_new_application') return;
+        if (d.type === 'admin_new_order') acknowledgeAdminNewOrders();
+        const isApplication = d.type === 'admin_new_application';
         try {
           if (Notification.permission === 'granted') {
-            new Notification(d.title || 'New order received', {
-              body: d.body || 'A new order needs attention.',
-              icon: './icon-192.png', tag: d.orderId ? 'admin-order-' + d.orderId : 'admin-order',
+            const alert = new Notification(d.title || (isApplication ? 'New restaurant application' : 'New order received'), {
+              body: d.body || (isApplication ? 'A restaurant application needs review.' : 'A new order needs attention.'),
+              icon: './icon-192.png',
+              tag: isApplication ? 'admin-application-' + (d.applicationId || 'new') : (d.orderId ? 'admin-order-' + d.orderId : 'admin-order'),
               renotify: true, requireInteraction: true
             });
+            alert.onclick = function () {
+              window.focus();
+              window.location.hash = isApplication ? 'vendor-applications' : 'orders';
+              if (isApplication && typeof window.refreshVendorApplications === 'function') window.refreshVendorApplications();
+              if (!isApplication && typeof window.refreshAdminOrders === 'function') window.refreshAdminOrders();
+              if (typeof window.refreshAdminNotifications === 'function') window.refreshAdminNotifications();
+              alert.close();
+            };
           }
         } catch (_) {}
-        try { if (typeof window.refreshAdminOrders === 'function') window.refreshAdminOrders(); } catch (_) {}
+        try {
+          if (isApplication && typeof window.refreshVendorApplications === 'function') window.refreshVendorApplications();
+          if (!isApplication && typeof window.refreshAdminOrders === 'function') window.refreshAdminOrders();
+          if (typeof window.refreshAdminNotifications === 'function') window.refreshAdminNotifications();
+        } catch (_) {}
       });
     } catch (err) { console.warn('[ADMIN PUSH]', err?.message || err); }
   }
