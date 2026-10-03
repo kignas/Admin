@@ -6,13 +6,18 @@ function closeModal(id) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('[data-close-modal]').forEach((btn) => {
-    btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
-  });
-  document.querySelectorAll('.modal-overlay').forEach((overlay) => {
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeModal(overlay.id);
-    });
+  // Delegate close handling so it also works for modals created after page load.
+  // Vendor application review creates its modal dynamically, so binding only
+  // to elements present at DOMContentLoaded misses both its X and Close buttons.
+  document.addEventListener('click', (e) => {
+    const closeButton = e.target.closest('[data-close-modal]');
+    if (closeButton) {
+      closeModal(closeButton.dataset.closeModal);
+      return;
+    }
+
+    const overlay = e.target.closest('.modal-overlay');
+    if (overlay && e.target === overlay) closeModal(overlay.id);
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
