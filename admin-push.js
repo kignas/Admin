@@ -30,10 +30,11 @@
     if (!('serviceWorker' in navigator) || !('Notification' in window) || !window.firebase?.messaging) return;
     try {
       if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-      const reg = await navigator.serviceWorker.register('./fcm/firebase-messaging-sw.js', { scope: './fcm/' });
+      // The worker lives at the repository root (firebase-messaging-sw.js).
+      const reg = await navigator.serviceWorker.register('./firebase-messaging-sw.js', { scope: './' });
       if (Notification.permission === 'default') {
-        // Permission is requested only from a user gesture; otherwise the
-        // browser may reject it silently.
+        // Permission is requested only from a user gesture (see the pointerdown
+        // handler below); otherwise the browser may reject it silently.
         return;
       }
       if (Notification.permission !== 'granted') return;
@@ -65,8 +66,15 @@
       });
     } catch (err) { console.warn('[ADMIN PUSH]', err?.message || err); }
   }
-  // Browser permission must be requested after a gesture.
-  document.addEventListener('pointerdown', function () { initAdminPush(); }, { once: true });
+  // Browser permission must be requested after a gesture: the first pointer
+  // interaction triggers the native prompt, then push registration continues.
+  document.addEventListener('pointerdown', function () {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default' && Notification.requestPermission) {
+      Notification.requestPermission().finally(function () { initAdminPush(); });
+    } else {
+      initAdminPush();
+    }
+  }, { once: true });
   // If permission was already granted, initialize immediately.
   if (typeof Notification !== 'undefined' && Notification.permission === 'granted') initAdminPush();
 })();
