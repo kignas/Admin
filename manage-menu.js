@@ -217,7 +217,7 @@
   /* ============================================================
      CUSTOMIZATION BUILDER — define option groups on a menu item
      (size / toppings / add-ons), matching the extended Menu model:
-       { title, required, minSelect, maxSelect, options:[{label,extraPrice,isVeg}] }
+       { title, required, minSelect, maxSelect, pricingMode:'extra'|'portion', options:[{label,extraPrice,isVeg}] }
      Self-contained: injects its own UI into the form and contributes
      `customizations` to the save payload.
      ============================================================ */
@@ -235,6 +235,7 @@
       .cust-group-rules{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:10px 0;font-size:13px;color:#374151}
       .cust-group-rules label{display:flex;gap:6px;align-items:center}
       .cust-group-rules select,.cust-max{padding:6px 8px;border:1px solid #d1d5db;border-radius:8px;font:inherit}
+      .cust-pricing-mode{padding:6px 8px;border:1px solid #d1d5db;border-radius:8px;font:inherit;max-width:100%}
       .cust-max{width:64px}
       .cust-opt{display:flex;gap:8px;align-items:center;margin-bottom:6px}
       .cust-opt-label{flex:1;padding:7px 9px;border:1px solid #d1d5db;border-radius:8px;font:inherit}
@@ -282,6 +283,7 @@
       '<button type="button" class="cust-del-group" aria-label="Remove group">✕</button></div>' +
       '<div class="cust-group-rules">' +
         '<label><input type="checkbox" class="cust-required" ' + (g.required ? 'checked' : '') + '> Required</label>' +
+        '<label>Price type <select class="cust-pricing-mode"><option value="extra" ' + ((g.pricingMode || 'extra') !== 'portion' ? 'selected' : '') + '>Add to base price</option><option value="portion" ' + (g.pricingMode === 'portion' ? 'selected' : '') + '>Final portion price</option></select></label>' +
         '<label>Selection <select class="cust-type"><option value="single" ' + (!multi ? 'selected' : '') + '>Choose 1</option>' +
         '<option value="multi" ' + (multi ? 'selected' : '') + '>Choose many</option></select></label>' +
         '<label class="cust-max-wrap" style="' + (multi ? '' : 'display:none') + '">Max <input type="number" class="cust-max" min="1" value="' + (multi ? (g.maxSelect || 2) : 2) + '"></label>' +
@@ -290,6 +292,8 @@
     const optWrap = card.querySelector('.cust-options');
     const opts = Array.isArray(g.options) ? g.options : [];
     (opts.length ? opts : [{}]).forEach(o => optWrap.appendChild(custOptionRow(o)));
+    const priceMode = card.querySelector('.cust-pricing-mode');
+    card.querySelectorAll('.cust-opt-price').forEach(input => { input.placeholder = priceMode.value === 'portion' ? 'Final ₹' : '₹ extra'; });
     return card;
   }
   custGroups.addEventListener('click', (e) => {
@@ -298,6 +302,21 @@
     if (e.target.closest('.cust-add-option')) { e.target.closest('.cust-group').querySelector('.cust-options').appendChild(custOptionRow()); }
   });
   custGroups.addEventListener('change', (e) => {
+    if (e.target.classList.contains('cust-pricing-mode')) {
+      const group = e.target.closest('.cust-group');
+      const mode = e.target.value;
+      group.querySelectorAll('.cust-opt-price').forEach(input => { input.placeholder = mode === 'portion' ? 'Final ₹' : '₹ extra'; });
+      if (mode === 'portion') {
+        const type = group.querySelector('.cust-type');
+        if (type) type.value = 'single';
+        const maxWrap = group.querySelector('.cust-max-wrap');
+        if (maxWrap) maxWrap.style.display = 'none';
+        const maxInput = group.querySelector('.cust-max');
+        if (maxInput) maxInput.value = '1';
+        const required = group.querySelector('.cust-required');
+        if (required) required.checked = true;
+      }
+    }
     if (e.target.classList.contains('cust-type')) {
       const mw = e.target.closest('.cust-group').querySelector('.cust-max-wrap');
       if (mw) mw.style.display = e.target.value === 'multi' ? '' : 'none';
@@ -312,7 +331,8 @@
       const title = card.querySelector('.cust-title').value.trim();
       if (!title) return;
       const required = card.querySelector('.cust-required').checked;
-      const multi = card.querySelector('.cust-type').value === 'multi';
+      const pricingMode = card.querySelector('.cust-pricing-mode').value === 'portion' ? 'portion' : 'extra';
+      const multi = pricingMode !== 'portion' && card.querySelector('.cust-type').value === 'multi';
       const maxSelect = multi ? Math.max(1, Number(card.querySelector('.cust-max').value) || 1) : 1;
       const options = [];
       card.querySelectorAll('.cust-opt').forEach(row => {
@@ -320,7 +340,7 @@
         if (!label) return;
         options.push({ label, extraPrice: Number(row.querySelector('.cust-opt-price').value) || 0, isVeg: row.querySelector('.cust-opt-veg-cb').checked });
       });
-      if (options.length) out.push({ title, required, minSelect: required ? 1 : 0, maxSelect, options });
+      if (options.length) out.push({ title, required: pricingMode === 'portion' ? true : required, minSelect: pricingMode === 'portion' ? 1 : (required ? 1 : 0), maxSelect, pricingMode, options });
     });
     return out;
   }
