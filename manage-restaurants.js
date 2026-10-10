@@ -326,7 +326,9 @@
     }
 
     const statusLabel = AVAILABILITY_LABELS[status];
-    const hoursSummary = autoHours ? 'Auto Hours enabled.' : `Manual hours ${opensAt}–${closesAt}.`;
+    const hoursSummary = autoHours
+      ? 'Auto Hours enabled; the weekly schedule will control opening and closing.'
+      : `Manual status hours ${opensAt}–${closesAt}; weekly opening hours will also be saved.`;
     if (!confirm(`Save availability changes?\n\nStatus: ${statusLabel}\n${hoursSummary}`)) return;
 
     savingAvailability = true;
@@ -335,14 +337,24 @@
     availabilitySaveBtn.textContent = 'Saving…';
 
     try {
-      const body = { status, autoHours, opensAt: opensAtInput?.value || '', closesAt: closesAtInput?.value || '' };
+      const body = {
+        status,
+        autoHours,
+        // The weekly schedule is the source of truth for automatic opening/closing.
+        // Send it with this PATCH so one Save availability action persists both settings.
+        openingHours: getWeeklyHours('rm-weekly-hours'),
+        opensAt: opensAtInput?.value || '',
+        closesAt: closesAtInput?.value || '',
+      };
       if (!autoHours) {
         body.opensAt = opensAt;
         body.closesAt = closesAt;
       }
       await apiRequest(`/restaurants/${id}/availability`, { method: 'PATCH', body });
       renderAvailabilityBadge(status);
-      availabilityResultBox.textContent = 'Availability updated.';
+      availabilityResultBox.textContent = autoHours
+        ? 'Availability and weekly opening hours updated. Automatic status follows the weekly schedule.'
+        : 'Availability and weekly opening hours updated.';
       availabilityResultBox.className = 'modal-result show success';
       showToast('Availability updated.', 'success');
       loadRestaurants();
