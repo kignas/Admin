@@ -1,38 +1,92 @@
-      - name: Configure Firebase for Android
-        env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: |
-          set -euo pipefail
-          test -n "$GOOGLE_SERVICES_JSON"
-          mkdir -p android/app
-          printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
+name: Build Eatswada Admin APK
 
-          const path = 'android/app/build.gradle';
-          let content = fs.readFileSync(path, 'utf8');
+on:
+workflow_dispatch:
+push:
+branches: [main, master]
 
-          if (!content.includes('com.google.gms.google-services')) {
-            if (!/plugins\s*\{/.test(content)) {
-              throw new Error('Android Gradle plugins block not found');
-            }
-            content = content.replace(
-              /plugins\s*\{/,
-              "plugins {\n    id 'com.google.gms.google-services' version '4.4.4'"
-            );
-            fs.writeFileSync(path, content);
-          }
+permissions:
+contents: read
 
-          const config = JSON.parse(
-            fs.readFileSync('android/app/google-services.json', 'utf8')
-          );
-          const packages = (config.client || []).map(
-            client => client.client_info?.android_client_info?.package_name
-          );
+jobs:
+build-apk:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout repository
+uses: actions/checkout@v4
 
-          if (!packages.includes('com.eatswada.admin')) {
-            throw new Error('Admin Firebase package name is missing');
-          }
+  - name: Set up Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: 22
 
-          console.log('Admin Firebase configuration validated.');
-          NODE
+  - name: Set up Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '21'
+
+  - name: Install dependencies
+    run: npm install
+
+  - name: Prepare Admin web assets
+    run: npm run android:prepare
+
+  - name: Generate Android project
+    run: npx cap add android
+
+  - name: Sync Capacitor plugins
+    run: npx cap sync android
+
+  - name: Configure Firebase for Android
+    env:
+      GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+    run: |
+      set -euo pipefail
+      test -n "$GOOGLE_SERVICES_JSON" || { echo "Missing GOOGLE_SERVICES_JSON secret"; exit 1; }
+      mkdir -p android/app
+      printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+      node --input-type=module <<'NODE'
+      import fs from 'node:fs';
+
+      const file = 'android/app/google-services.json';
+      const config = JSON.parse(fs.readFileSync(file, 'utf8'));
+      const packages = (config.client || []).map(
+        c => c.client_info?.android_client_info?.package_name
+      );
+
+      if (!packages.includes('com.eatswada.admin')) {
+        throw new Error('Firebase JSON does not contain com.eatswada.admin');
+      }
+
+      const gradleFile = 'android/app/build.gradle';
+      let gradle = fs.readFileSync(gradleFile, 'utf8');
+
+      if (!gradle.includes('com.google.gms.google-services')) {
+        if (!/plugins\s*\{/.test(gradle)) {
+          throw new Error('Android app Gradle plugins block not found');
+        }
+
+        gradle = gradle.replace(
+          /plugins\s*\{/,
+          "plugins {\n    id 'com.google.gms.google-services' version '4.4.4'"
+        );
+
+        fs.writeFileSync(gradleFile, gradle);
+      }
+
+      console.log('Admin Firebase configuration validated.');
+      NODE
+
+  - name: Build debug APK
+    run: |
+      cd android
+      chmod +x gradlew
+      ./gradlew assembleDebug
+
+  - name: Upload APK artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: Eatswada-Admin-APK-debug
+      path: android/app/build/outputs/apk/debug/app-debug.apk
+      if-no-files-found: error
