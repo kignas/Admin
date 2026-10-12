@@ -80,7 +80,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDeg
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
