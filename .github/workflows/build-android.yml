@@ -1,52 +1,38 @@
-name: Build Eatswada Admin APK
-
-on:
-  workflow_dispatch:
-  push:
-    branches: [main, master]
-
-permissions:
-  contents: read
-
-jobs:
-  build-apk:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Prepare Admin web assets
-        run: npm run android:prepare
-
-      - name: Generate Android project
-        run: npx cap add android
-
-      - name: Sync Capacitor plugins
-        run: npx cap sync android
-
-      - name: Build debug APK
+      - name: Configure Firebase for Android
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          set -euo pipefail
+          test -n "$GOOGLE_SERVICES_JSON"
+          mkdir -p android/app
+          printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Eatswada-Admin-APK-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+          const path = 'android/app/build.gradle';
+          let content = fs.readFileSync(path, 'utf8');
+
+          if (!content.includes('com.google.gms.google-services')) {
+            if (!/plugins\s*\{/.test(content)) {
+              throw new Error('Android Gradle plugins block not found');
+            }
+            content = content.replace(
+              /plugins\s*\{/,
+              "plugins {\n    id 'com.google.gms.google-services' version '4.4.4'"
+            );
+            fs.writeFileSync(path, content);
+          }
+
+          const config = JSON.parse(
+            fs.readFileSync('android/app/google-services.json', 'utf8')
+          );
+          const packages = (config.client || []).map(
+            client => client.client_info?.android_client_info?.package_name
+          );
+
+          if (!packages.includes('com.eatswada.admin')) {
+            throw new Error('Admin Firebase package name is missing');
+          }
+
+          console.log('Admin Firebase configuration validated.');
+          NODE
