@@ -28,6 +28,163 @@
     statActive.textContent = '0';
   }
 
+
+  // ── Rider applications (separate from already-approved rider accounts) ──
+  // The backend contract is GET /admin/riders/applications and
+  // PATCH /admin/riders/applications/:id/review.
+  const riderView = document.getElementById('view-manage-riders');
+  const applicationsMarkup = `
+    <div class="view-head" style="margin-top:4px;">
+      <div>
+        <h2>Rider Applications</h2>
+        <div class="sub">Review new delivery-partner applications before they can sign in.</div>
+      </div>
+      <div class="view-head-actions">
+        <select id="rider-app-status" aria-label="Filter rider applications">
+          <option value="submitted">New applications</option>
+          <option value="under_review">Under review</option>
+          <option value="needs_changes">Needs changes</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="withdrawn">Withdrawn</option>
+          <option value="all">All applications</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" id="rider-app-refresh" type="button">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="card mgmt-card" style="margin-bottom:20px;">
+      <div class="toolbar">
+        <span class="toolbar-count" id="rider-app-count">Applications</span>
+        <span class="hint">Approving creates the rider account using the password they set during registration.</span>
+      </div>
+      <div class="table-wrap" id="rider-app-table-wrap">
+        <div class="state-block"><div class="spinner-lg"></div></div>
+      </div>
+    </div>`;
+  if (riderView && !document.getElementById('rider-applications-panel')) {
+    const panel = document.createElement('div');
+    panel.id = 'rider-applications-panel';
+    panel.innerHTML = applicationsMarkup;
+    const stats = document.getElementById('riders-stat-grid');
+    if (stats) riderView.insertBefore(panel, stats);
+    else riderView.prepend(panel);
+  }
+
+  const riderAppStatus = document.getElementById('rider-app-status');
+  const riderAppTable = document.getElementById('rider-app-table-wrap');
+  const riderAppCount = document.getElementById('rider-app-count');
+  const riderAppRefresh = document.getElementById('rider-app-refresh');
+  let riderApplications = [];
+  let riderAppsLoading = false;
+
+  const APP_STATUS_LABELS = {
+    submitted: 'New', under_review: 'Under review', needs_changes: 'Needs changes',
+    approved: 'Approved', rejected: 'Rejected', withdrawn: 'Withdrawn'
+  };
+  const APP_VEHICLE_LABELS = { bike: 'Bike', scooter: 'Scooter', bicycle: 'Bicycle', car: 'Car' };
+
+  function appStatusBadge(status) {
+    const cls = status === 'approved' ? 'badge-success'
+      : status === 'rejected' || status === 'withdrawn' ? 'badge-danger'
+      : status === 'needs_changes' ? 'badge-warning'
+      : status === 'under_review' ? 'badge-info' : 'badge-muted';
+    return `<span class="badge ${cls}">${escapeHtml(APP_STATUS_LABELS[status] || status || 'Unknown')}</span>`;
+  }
+
+  function renderRiderApplications(apps) {
+    if (!apps.length) {
+      riderAppTable.innerHTML = `<div class="state-block"><h4>No applications found</h4><p>Applications matching this filter will appear here.</p></div>`;
+      return;
+    }
+    riderAppTable.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>Applicant</th><th>Contact</th><th>Vehicle</th><th>Delivery area</th><th>Submitted</th><th>Status</th><th>Review</th></tr></thead>
+        <tbody>${apps.map(a => {
+          const id = String(a.id || a._id || '');
+          const canReview = !['approved', 'rejected', 'withdrawn'].includes(a.status);
+          return `<tr>
+            <td><div class="row-name">${escapeHtml(a.name || '—')}</div><div class="row-sub mono">${escapeHtml(id)}</div></td>
+            <td><div>${escapeHtml(a.email || '—')}</div><div class="row-sub mono">${escapeHtml(a.phone || '—')}</div></td>
+            <td><div class="row-name">${escapeHtml(APP_VEHICLE_LABELS[a.vehicleType] || a.vehicleType || '—')}</div><div class="row-sub mono">${escapeHtml(a.vehicleNumber || '—')}</div></td>
+            <td><div>${escapeHtml(a.deliveryZone || '—')}</div><div class="row-sub">DL: ${escapeHtml(a.drivingLicenseNumber || 'Not provided')}</div></td>
+            <td>${escapeHtml(formatDate(a.createdAt))}</td>
+            <td>${appStatusBadge(a.status)}${a.reviewNote ? `<div class="row-sub" style="max-width:220px;white-space:normal;margin-top:5px;">Note: ${escapeHtml(a.reviewNote)}</div>` : ''}</td>
+            <td><div class="row-actions">
+              <button type="button" class="btn btn-ghost btn-sm rider-app-review" data-id="${escapeHtml(id)}" data-action="under_review" ${!canReview || a.status === 'under_review' ? 'disabled' : ''}>Review</button>
+              <button type="button" class="btn btn-primary btn-sm rider-app-review" data-id="${escapeHtml(id)}" data-action="approve" ${!canReview ? 'disabled' : ''}>Approve</button>
+              <button type="button" class="btn btn-ghost btn-sm rider-app-review" data-id="${escapeHtml(id)}" data-action="needs_changes" ${!canReview ? 'disabled' : ''}>Request changes</button>
+              <button type="button" class="btn btn-danger btn-sm rider-app-review" data-id="${escapeHtml(id)}" data-action="reject" ${!canReview ? 'disabled' : ''}>Reject</button>
+            </div></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`;
+    riderAppTable.querySelectorAll('.rider-app-review').forEach(button => {
+      button.addEventListener('click', () => reviewRiderApplication(button));
+    });
+  }
+
+  async function loadRiderApplications() {
+    if (!riderAppTable || riderAppsLoading) return;
+    riderAppsLoading = true;
+    riderAppTable.innerHTML = `<div class="state-block"><div class="spinner-lg"></div></div>`;
+    try {
+      const status = riderAppStatus?.value || 'submitted';
+      const res = await apiRequest('/admin/riders/applications', { query: { status, limit: 100 } });
+      const apps = Array.isArray(res.data) ? res.data : (Array.isArray(res.data?.applications) ? res.data.applications : []);
+      riderApplications = apps;
+      riderAppCount.textContent = `${apps.length} application${apps.length === 1 ? '' : 's'}${status === 'submitted' ? ' awaiting review' : ''}`;
+      renderRiderApplications(apps);
+    } catch (err) {
+      riderAppCount.textContent = 'Applications unavailable';
+      riderAppTable.innerHTML = `<div class="state-block"><h4>Could not load applications</h4><p>${escapeHtml(err.message || 'Please try again.')}</p><button class="btn btn-ghost btn-sm" id="rider-app-retry" type="button">Retry</button></div>`;
+      document.getElementById('rider-app-retry')?.addEventListener('click', loadRiderApplications);
+    } finally {
+      riderAppsLoading = false;
+    }
+  }
+
+  async function reviewRiderApplication(button) {
+    const id = button.dataset.id;
+    const action = button.dataset.action;
+    const app = riderApplications.find(item => String(item.id || item._id) === id);
+    if (!app || !id) return;
+
+    let note = '';
+    if (action === 'needs_changes' || action === 'reject') {
+      note = window.prompt(action === 'reject' ? 'Enter the reason for rejecting this application:' : 'Tell the applicant what needs to be changed:');
+      if (note === null) return;
+      note = note.trim();
+      if (!note) {
+        showToast('A review note is required for this action.', 'error');
+        return;
+      }
+    } else if (action === 'approve') {
+      const confirmed = window.confirm(`Approve ${app.name || 'this applicant'}? This creates an active rider account using the password they set during application.`);
+      if (!confirmed) return;
+      note = (window.prompt('Optional approval note (leave blank if none):') || '').trim();
+    } else if (action === 'under_review') {
+      note = (window.prompt('Optional note for this review (leave blank if none):') || '').trim();
+    }
+
+    const buttons = riderAppTable.querySelectorAll(`.rider-app-review[data-id="${CSS.escape(id)}"]`);
+    buttons.forEach(item => { item.disabled = true; });
+    try {
+      const res = await apiRequest(`/admin/riders/applications/${encodeURIComponent(id)}/review`, {
+        method: 'PATCH',
+        body: { action, note },
+      });
+      showToast(res.message || 'Rider application updated.', 'success');
+      await loadRiderApplications();
+      if (action === 'approve') loadStats();
+    } catch (err) {
+      showToast(err.message || 'Could not update rider application.', 'error');
+      buttons.forEach(item => { item.disabled = false; });
+    }
+  }
+
+  riderAppStatus?.addEventListener('change', loadRiderApplications);
+  riderAppRefresh?.addEventListener('click', loadRiderApplications);
+
   // ── Rider list ────────────────────────────────────────────────
   const tableWrap = document.getElementById('riders-table-wrap');
   const footer = document.getElementById('riders-footer');
@@ -396,6 +553,7 @@
   // account details, so a stale "loadedOnce" cache would show wrong figures.
   document.addEventListener('admin:view-changed', (e) => {
     if (e.detail.view === 'manage-riders') {
+      loadRiderApplications();
       loadRiders();
       loadStats();
     }
