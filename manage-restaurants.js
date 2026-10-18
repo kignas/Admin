@@ -259,6 +259,9 @@
       document.getElementById('rm-name').value = r.name || '';
       document.getElementById('rm-address').value = r.address || '';
       document.getElementById('rm-phone').value = r.phone || '';
+      document.getElementById('rm-fssaiLicenseNumber').value = r.fssaiLicenseNumber || '';
+      document.getElementById('rm-fssaiVerificationStatus').value = r.fssaiVerificationStatus || 'pending';
+      document.getElementById('rm-fssai-result').textContent = '';
       document.getElementById('rm-description').value = r.description || '';
       document.getElementById('rm-commissionRate').value = '';
       document.getElementById('rm-commission-error').textContent = '';
@@ -418,6 +421,10 @@
     try {
       const res = await apiRequest(`/admin/restaurants/${id}/delivery-settings`);
       const d = res.data || {};
+      const fssaiInput = document.getElementById('rm-fssaiLicenseNumber');
+      const fssaiStatus = document.getElementById('rm-fssaiVerificationStatus');
+      if (fssaiInput) fssaiInput.value = d.fssaiLicenseNumber || fssaiInput.value || '';
+      if (fssaiStatus) fssaiStatus.value = d.fssaiVerificationStatus || 'pending';
       document.getElementById('rm-businessType').value = d.businessType || 'restaurant';
       document.getElementById('rm-deliveryMode').value = d.deliveryMode || 'eatswada_rider';
       document.getElementById('rm-deliveryMode').dataset.original = d.deliveryMode || 'eatswada_rider';
@@ -430,6 +437,36 @@
       dsResult.className = 'modal-result show error';
     }
   }
+
+  const fssaiSaveBtn = document.getElementById('rm-fssai-save');
+  fssaiSaveBtn?.addEventListener('click', async () => {
+    const id = document.getElementById('rm-id').value;
+    const result = document.getElementById('rm-fssai-result');
+    const fssaiLicenseNumber = document.getElementById('rm-fssaiLicenseNumber').value.trim();
+    const status = document.getElementById('rm-fssaiVerificationStatus').value;
+    result.textContent = '';
+    if (fssaiLicenseNumber.length > 100) {
+      result.textContent = 'FSSAI number must be 100 characters or fewer.';
+      return;
+    }
+    fssaiSaveBtn.disabled = true;
+    const oldLabel = fssaiSaveBtn.textContent;
+    fssaiSaveBtn.textContent = 'Saving…';
+    try {
+      const res = await apiRequest(`/admin/restaurants/${id}/fssai`, {
+        method: 'PATCH',
+        body: { fssaiLicenseNumber, status },
+      });
+      result.textContent = 'FSSAI details saved.';
+      showToast('FSSAI details saved.', 'success');
+    } catch (err) {
+      result.textContent = err.message || 'Could not save FSSAI details.';
+      showToast(result.textContent, 'error');
+    } finally {
+      fssaiSaveBtn.disabled = false;
+      fssaiSaveBtn.textContent = oldLabel;
+    }
+  });
 
   dsSaveBtn.addEventListener('click', async () => {
     if (savingDeliverySettings) return;

@@ -146,6 +146,7 @@
       vendorPhone: f('cv-vendorPhone').value.trim(),
       vendorPassword: f('cv-vendorPassword').value,
       restaurantName: f('cv-restaurantName').value.trim(),
+      fssaiLicenseNumber: f('cv-fssaiLicenseNumber')?.value.trim() || undefined,
       cuisine: toArray(f('cv-cuisine').value),
       address: f('cv-address').value.trim() || undefined,
       phone: f('cv-phone')?.value.trim() || undefined,
