@@ -901,7 +901,7 @@
         <div class="view-head">
           <div>
             <h2>Support Tickets</h2>
-            <div class="sub">Vendor support conversations with full history, replies and status flow.</div>
+            <div class="sub">Customer and vendor support conversations, replies and ticket resolution.</div>
           </div>
           <button class="btn btn-ghost btn-sm" id="support-refresh">↻ Refresh</button>
         </div>
@@ -909,13 +909,19 @@
           <div class="toolbar">
             <div class="search-box">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-              <input type="text" id="support-search" placeholder="Search subject, ticket #, vendor…" />
+              <input type="text" id="support-search" placeholder="Search ticket #, customer, vendor, order…" />
             </div>
-            <select id="support-status-filter">
+            <select id="support-type-filter" aria-label="Ticket type">
+              <option value="">All ticket types</option>
+              <option value="customer">Customer tickets</option>
+              <option value="vendor">Vendor tickets</option>
+            </select>
+            <select id="support-status-filter" aria-label="Ticket status">
               <option value="">All statuses</option>
               <option value="open">Open</option>
-              <option value="waiting_vendor">Waiting vendor</option>
               <option value="waiting_admin">Waiting admin</option>
+              <option value="waiting_customer">Waiting customer</option>
+              <option value="waiting_vendor">Waiting vendor</option>
               <option value="resolved">Resolved</option>
               <option value="closed">Closed</option>
             </select>
