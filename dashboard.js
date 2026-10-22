@@ -272,7 +272,8 @@
   function showError(errors) {
     if (!errors.length) { errorBanner.style.display = 'none'; return; }
     errorBanner.style.display = 'flex';
-    errorMsg.textContent = `${errors.length} dashboard source(s) failed: ${errors[0]} — no fallback host is used, retry when Render responds.`;
+    const apiHost = (() => { try { return new URL(CONFIG.API_BASE_URL).host; } catch (_) { return 'the configured API'; } })();
+    errorMsg.textContent = `${errors.length} dashboard source(s) failed: ${errors[0]} — no fallback host is used. Check ${apiHost} and retry.`;
   }
 
   async function loadDashboard() {

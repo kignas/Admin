@@ -1,6 +1,6 @@
 /* ==========================================================================
    EATSWADA ADMIN — DESIGN SYSTEM
-   Palette: Eatswada green (brand) + control-room ink, built for a fast-moving
+   Palette: Eatswada burgundy + warm ivory with a calm control-room surface, built for a fast-moving
    hyperlocal ops team scanning live numbers, not a marketing surface.
    Type: Space Grotesk (display/nav) + Inter (body/labels) + IBM Plex Mono
    (every number — money, counts, order IDs, timestamps — so data reads
@@ -23,15 +23,15 @@
   --on-ink:      #E9EAF0;
   --on-ink-muted:#9297A8;
 
-  /* Primary — Eatswada brand green (historical token name kept so every
-     existing component picks the new brand colour automatically). */
-  --flame:       #0C7C50;
-  --flame-dark:  #0A6542;
-  --flame-wash:  #E7F5EE;
+  /* Primary — Eatswada brand burgundy (historical token name kept so every
+     existing component picks the brand colour without changing component contracts). */
+  --flame:       #690D27;
+  --flame-dark:  #4F091D;
+  --flame-wash:  #F8E9EE;
 
   /* Secondary accent — warm highlight for charts and callouts */
-  --accent:      #FF7A45;
-  --accent-wash: #FFF1EA;
+  --accent:      #D7A33D;
+  --accent-wash: #FFF5DC;
 
   --success:     #1FAA6B;
   --success-wash:#E8F8F1;

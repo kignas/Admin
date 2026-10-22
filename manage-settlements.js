@@ -251,7 +251,8 @@
       buttons.push(['rejected', 'Reject', 'btn-danger']);
       buttons.push(['cancelled', 'Cancel', 'btn-ghost']);
     }
-    return buttons.map(([status, label, cls]) =>
+    const reconcile = `<button class="btn btn-sm btn-ghost payout-reconcile" data-id="${esc(p._id)}">Reconcile</button>`;
+    return reconcile + buttons.map(([status, label, cls]) =>
       `<button class="btn btn-sm ${cls} payout-action" data-id="${esc(p._id)}" data-status="${status}" data-amount="${esc(p.amount)}">${label}</button>`).join('');
   }
 
@@ -280,22 +281,76 @@
 
     payoutsWrap.querySelectorAll('.payout-action').forEach(btn =>
       btn.addEventListener('click', () => payoutAction(btn.dataset.id, btn.dataset.status)));
+    payoutsWrap.querySelectorAll('.payout-reconcile').forEach(btn =>
+      btn.addEventListener('click', () => showPayoutReconciliation(btn.dataset.id)));
+  }
+
+  function reconciliationModal() {
+    let m = document.getElementById('payout-reconciliation-modal');
+    if (m) return m;
+    m = document.createElement('div'); m.id = 'payout-reconciliation-modal'; m.className = 'modal-overlay';
+    m.innerHTML = `<div class="modal-box" style="max-width:760px;">
+      <div class="modal-head"><h3>Payout reconciliation</h3><button class="modal-close" data-close-modal="payout-reconciliation-modal" type="button">✕</button></div>
+      <div class="modal-body" id="payout-reconciliation-body"><div class="state-block"><div class="spinner-lg"></div></div></div>
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" data-close-modal="payout-reconciliation-modal">Close</button></div>
+    </div>`;
+    document.body.appendChild(m); return m;
+  }
+
+  async function showPayoutReconciliation(id) {
+    const m = reconciliationModal();
+    const body = m.querySelector('#payout-reconciliation-body');
+    body.innerHTML = '<div class="state-block"><div class="spinner-lg"></div><p>Checking linked ledger entries…</p></div>';
+    openModal('payout-reconciliation-modal');
+    try {
+      const res = await apiRequest(`/admin/payout-requests/${encodeURIComponent(id)}/reconciliation`);
+      const d = res.data || {}, r = d.reconciliation || {}, req = d.request || {};
+      const good = r.allEntriesLinked === true && r.amountMatches === true;
+      const entries = Array.isArray(d.entries) ? d.entries : [];
+      body.innerHTML = `<div class="detail-head"><div><div class="detail-title">${esc(req.restaurant?.name || 'Payout request')}</div><div class="detail-sub mono">${esc(req._id || id)} · ${esc(req.status || 'unknown status')}</div></div><span class="badge ${good ? 'badge-success' : 'badge-danger'}">${good ? 'Reconciled' : 'Mismatch / incomplete'}</span></div>
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin:14px 0;">
+          <div class="stat-card"><div class="stat-label">Requested</div><div class="stat-value">${formatMoney(r.requestAmount)}</div></div>
+          <div class="stat-card"><div class="stat-label">Ledger total</div><div class="stat-value">${formatMoney(r.ledgerAmount)}</div></div>
+          <div class="stat-card"><div class="stat-label">Difference</div><div class="stat-value">${formatMoney(r.difference)}</div></div>
+          <div class="stat-card"><div class="stat-label">Linked entries</div><div class="stat-value">${Number(r.entryCountFound)||0} / ${Number(r.entryCountExpected)||0}</div></div>
+        </div>
+        <p class="hint">${r.canMarkPaid === true ? 'Ledger entries reconcile. If the real bank/UPI transfer has already happened, you can record its UTR in the payout action.' : 'Do not mark this payout paid until the ledger is reconciled and its status is eligible for payment. This screen does not transfer money.'}</p>
+        ${entries.length ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Order</th><th>Ledger status</th><th>Net amount</th><th>Created</th><th>Linked</th></tr></thead><tbody>${entries.map(e => { const linked = String(e.payoutRequest || '') === String(req._id || id); return `<tr><td class="mono">${esc(e.orderNumber || e.order || '—')}</td><td>${esc(e.status || '—')}</td><td class="mono">${formatMoney(e.netSettlementAmount)}</td><td>${formatDate(e.createdAt)}</td><td><span class="badge ${linked ? 'badge-success' : 'badge-danger'}">${linked ? 'Yes' : 'No'}</span></td></tr>`; }).join('')}</tbody></table></div>` : '<div class="state-block"><p>No ledger entries were returned for this payout.</p></div>'}`;
+    } catch (err) {
+      body.innerHTML = `<div class="state-block"><h4>Could not reconcile payout</h4><p>${esc(err.message || 'Request failed')}</p><button class="btn btn-ghost btn-sm" id="payout-reconcile-retry">Retry</button></div>`;
+      body.querySelector('#payout-reconcile-retry')?.addEventListener('click', () => showPayoutReconciliation(id));
+    }
   }
 
   async function payoutAction(id, next) {
     if (busy) return;
     const isPaid = next === 'paid';
     const isDrop = next === 'rejected' || next === 'cancelled';
+    if (isPaid) {
+      try {
+        const check = await apiRequest(`/admin/payout-requests/${encodeURIComponent(id)}/reconciliation`);
+        if (check.data?.reconciliation?.canMarkPaid !== true) {
+          showToast('Payout cannot be marked paid: its ledger does not reconcile or its status is not eligible. Open Reconcile for details.', 'error');
+          await showPayoutReconciliation(id);
+          return;
+        }
+      } catch (err) {
+        showToast(err.message || 'Could not verify payout reconciliation. Payment status was not changed.', 'error');
+        return;
+      }
+    }
     const input = await askConfirmation({
       title: next === 'processing' ? 'Move payout to processing?' : isPaid ? 'Mark payout as paid?' : `${next === 'rejected' ? 'Reject' : 'Cancel'} payout request?`,
       desc: isPaid
-        ? 'Marks the payout as paid in the backend and settles its reserved ledger entries. No real bank transfer is performed by this action.'
+        ? 'First confirm that the real bank/UPI transfer has already occurred. This records the bank UTR and settles matching ledger entries; it does not transfer money.'
         : isDrop
           ? 'Releases the reserved ledger entries back to eligible. The vendor can submit a new request.'
           : 'Updates the payout request status to processing.',
-      label: isPaid ? 'Payment reference (optional)' : isDrop ? 'Admin note (optional)' : 'Reference (optional)',
-      placeholder: isPaid ? 'e.g. UPI / bank transfer reference' : '',
-      confirmText: 'Confirm',
+      label: isPaid ? 'Bank UTR / transfer reference (required)' : isDrop ? 'Admin note (optional)' : 'Reference (optional)',
+      placeholder: isPaid ? 'Enter the actual bank/UPI UTR or transfer reference' : '',
+      required: isPaid,
+      validate: isPaid ? (value) => value.length > 120 ? 'Reference must be 120 characters or fewer.' : '' : undefined,
+      confirmText: isPaid ? 'Confirm transfer recorded' : 'Confirm',
       danger: isDrop,
     });
     if (input === null) return;
@@ -303,7 +358,7 @@
     busy = true;
     try {
       const body = { status: next };
-      if (isPaid && input) body.reference = input;
+      if (isPaid) { body.bankUtr = input; body.reference = input; }
       if (isDrop && input) body.adminNote = input;
       if (next === 'processing' && input) body.reference = input;
       await apiRequest(`/admin/payout-requests/${id}`, { method: 'PATCH', body });

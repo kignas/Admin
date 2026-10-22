@@ -37,6 +37,8 @@
   };
   const PRIORITY_BADGE = { urgent: 'badge-danger', high: 'badge-warning', normal: 'badge-muted', low: 'badge-muted' };
   const pretty = (s) => String(s || '').replace(/_/g, ' ');
+  const safeHttpsUrl = (value) => { try { const u = new URL(String(value || ''), location.href); return u.protocol === 'https:' ? u.href : ''; } catch (_) { return ''; } };
+  const mediaLinks = (values, label) => (Array.isArray(values) ? values : []).map((value, i) => { const url = safeHttpsUrl(value); return url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ${i + 1}</a>` : ''; }).filter(Boolean).join(' · ');
 
   function searchMatch(t) {
     const q = (searchInput?.value || '').trim().toLowerCase();
@@ -135,6 +137,7 @@
         <span class="badge ${STATUS_BADGE[t.status] || 'badge-muted'}">${esc(pretty(t.status))}</span>
       </div>
 
+      ${(Array.isArray(t.photos) && t.photos.length) ? `<section class="card" style="padding:12px;margin:12px 0;"><strong>Customer complaint photos</strong><div class="hint" style="margin-top:6px;">${mediaLinks(t.photos, 'Open photo')}</div></section>` : ''}
       <div class="chat">
         ${(t.messages || []).length
           ? t.messages.map(msg => `
@@ -144,6 +147,7 @@
                 <span class="mono">${msg.at ? formatDate(msg.at) : ''}</span>
               </div>
               <p>${esc(msg.message)}</p>
+              ${(Array.isArray(msg.attachments) && msg.attachments.length) ? `<div class="row-sub">Attachments: ${mediaLinks(msg.attachments, 'Open attachment')}</div>` : ''}
             </div>`).join('')
           : '<div class="state-block" style="padding:24px;"><p>No messages yet.</p></div>'}
       </div>

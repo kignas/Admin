@@ -17,7 +17,7 @@
   <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
   <aside class="sidebar">
     <div class="sidebar-brand">
-      <div class="mark">N</div>
+      <div class="mark" aria-hidden="true">E</div>
       <div>
         <div class="name">Eatswada</div>
         <div class="tag">Admin</div>
@@ -204,7 +204,7 @@
         <div class="sub" id="page-sub">Live snapshot of the Eatswada operations</div>
       </div>
       <div class="topbar-right">
-        <span class="env-chip" id="env-chip" title="Active API host">Render</span>
+        <span class="env-chip" id="env-chip" title="Active API host">API status</span>
       </div>
     </header>
 
@@ -215,7 +215,7 @@
         <div class="view-head dash-head">
           <div>
             <h2>Operational overview</h2>
-            <div class="sub">Live figures from the Render backend · no demo data</div>
+            <div class="sub">Live figures from the configured Eatswada API · no demo data</div>
           </div>
           <button class="btn btn-ghost btn-sm" id="dashboard-refresh">↻ Refresh</button>
         </div>
@@ -224,7 +224,7 @@
           <div class="dash-error-icon">!</div>
           <div>
             <strong>Some dashboard data could not be loaded</strong>
-            <p id="dashboard-error-msg">The backend did not respond. There is no fallback host — retry when Render is reachable.</p>
+            <p id="dashboard-error-msg">The backend did not respond. There is no fallback host. Check your connection and retry.</p>
           </div>
           <button class="btn btn-ghost btn-sm" id="dashboard-retry">Retry</button>
         </div>
