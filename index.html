@@ -259,6 +259,15 @@
           <div id="revenue-chart-wrap"><div class="state-block"><div class="spinner-lg"></div></div></div>
         </div>
 
+        <!-- Pillar 1: 1-tap platform control switches (maintenance, shortage, rain surge) -->
+        <div class="card panel" style="margin-top:16px;">
+          <div class="panel-head">
+            <h3>Platform control switches</h3>
+            <span class="toolbar-count">GET /api/admin/delivery-capacity</span>
+          </div>
+          <div id="dashboard-platform-controls"><div class="state-block"><div class="spinner-lg"></div></div></div>
+        </div>
+
         <div class="panel-grid">
           <div class="card panel">
             <div class="panel-head">
@@ -689,6 +698,13 @@
             </select>
             <span class="toolbar-count" id="orders-count"></span>
           </div>
+          <div class="sla-pills" id="orders-sla-pills">
+            <button class="pill active" data-sla="all">All orders</button>
+            <button class="pill" data-sla="stuck_vendor">Vendor SLA breach</button>
+            <button class="pill" data-sla="stuck_dispatch">Dispatch delay</button>
+            <button class="pill" data-sla="doorstep">Doorstep / OTP stuck</button>
+            <button class="pill" data-sla="cod">COD pending</button>
+          </div>
           <div class="table-wrap" id="orders-table-wrap">
             <div class="state-block"><div class="spinner-lg"></div></div>
           </div>
@@ -809,6 +825,8 @@
         <div class="tabs" id="settlements-tabs">
           <button class="tab active" data-tab="ledger">Ledger</button>
           <button class="tab" data-tab="payouts">Payout requests</button>
+          <button class="tab" data-tab="restaurants">Restaurant Settlements</button>
+          <button class="tab" data-tab="riders">Rider COD &amp; Payouts</button>
         </div>
 
         <div class="card integ-card" id="ledger-integrity">
@@ -860,6 +878,37 @@
             <div class="table-footer" id="payouts-footer" style="display:none;">
               <span class="pagination-info" id="payouts-page-info"></span>
               <div class="pagination" id="payouts-pagination"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 5: per-restaurant settlements, adjustments, batches, CSV -->
+        <div class="settlements-tab-panel" id="settlements-panel-restaurants" style="display:none;">
+          <div class="card mgmt-card">
+            <div class="toolbar">
+              <span class="toolbar-count" id="rest-settle-count"></span>
+              <div class="toolbar-actions">
+                <button class="btn btn-ghost btn-sm" id="rest-settle-export">⭳ CSV export</button>
+                <button class="btn btn-ghost btn-sm" id="rest-settle-refresh">↻ Refresh</button>
+              </div>
+            </div>
+            <div class="table-wrap" id="rest-settle-table-wrap">
+              <div class="state-block"><div class="spinner-lg"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 6: rider earnings, COD cash held, deposits & payouts -->
+        <div class="settlements-tab-panel" id="settlements-panel-riders" style="display:none;">
+          <div class="card mgmt-card">
+            <div class="toolbar">
+              <span class="toolbar-count" id="rider-settle-count"></span>
+              <div class="toolbar-actions">
+                <button class="btn btn-ghost btn-sm" id="rider-settle-refresh">↻ Refresh</button>
+              </div>
+            </div>
+            <div class="table-wrap" id="rider-settle-table-wrap">
+              <div class="state-block"><div class="spinner-lg"></div></div>
             </div>
           </div>
         </div>
@@ -1038,6 +1087,24 @@
             <span class="toolbar-count">GET /api/platform/settings</span>
           </div>
           <div id="settings-platform"><div class="state-block"><div class="spinner-lg"></div></div></div>
+        </div>
+
+        <!-- Pillar 1: maintenance, shortage circuit breaker, rain surge -->
+        <div class="card panel" style="margin-top:16px;">
+          <div class="panel-head">
+            <h3>Platform Maintenance &amp; Delivery Circuit Breakers</h3>
+            <span class="toolbar-count">PUT /api/platform/config</span>
+          </div>
+          <div id="settings-controls"><div class="state-block"><div class="spinner-lg"></div></div></div>
+        </div>
+
+        <!-- Pillar 2: checkout bill & delivery pricing controller -->
+        <div class="card panel" style="margin-top:16px;">
+          <div class="panel-head">
+            <h3>Checkout Bill &amp; Delivery Pricing Controller</h3>
+            <span class="toolbar-count">GET /api/platform/bill-policy</span>
+          </div>
+          <div id="settings-billing"><div class="state-block"><div class="spinner-lg"></div></div></div>
         </div>
       </section>
 

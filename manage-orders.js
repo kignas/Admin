@@ -22,6 +22,7 @@
   const countEl = document.getElementById('orders-count');
   const searchInput = document.getElementById('orders-search');
   const statusFilter = document.getElementById('orders-status-filter');
+  const slaPills = document.getElementById('orders-sla-pills');
 
   const STATUS_BADGE = {
     placed: 'muted', confirmed: 'warning', preparing: 'warning',
@@ -105,8 +106,35 @@
       items: Array.isArray(o.items) ? o.items : null,
       statusHistory: Array.isArray(o.statusHistory) ? o.statusHistory : null,
       hasDetail: true,
+      // Pillar 7 SLA inputs — used by the filter pills and override buttons.
+      dispatchNotBefore: o.dispatchNotBefore || null,
+      orderReadyAt: o.orderReadyAt || null,
+      isFoodReady: o.isFoodReady === true,
+      riderStatus: o.riderStatus || '',
+      riderAssignedAt: o.riderAssignedAt || null,
+      deliveryOtpVerified: o.deliveryOtpVerified === true,
+      adminOverrides: Array.isArray(o.adminOverrides) ? o.adminOverrides : [],
     };
   }
+
+  const SLA_BREACH_MS = 10 * 60 * 1000; // 10 minutes
+  const ageMs = (o) => Date.now() - new Date(o.createdAt || Date.now()).getTime();
+  const sinceMs = (d) => (d ? Date.now() - new Date(d).getTime() : Infinity);
+
+  // War-room SLA buckets. Kept purely client-side so the filter never blocks
+  // the table if a field is missing on the compact endpoint.
+  const SLA_FILTERS = {
+    all: () => true,
+    stuck_vendor: (o) => ['placed', 'confirmed'].includes(o.status) && ageMs(o) > SLA_BREACH_MS,
+    stuck_dispatch: (o) => ['preparing', 'waiting_for_rider'].includes(o.status)
+      && (o.isFoodReady || sinceMs(o.orderReadyAt) > SLA_BREACH_MS || ageMs(o) > 2 * SLA_BREACH_MS),
+    doorstep: (o) => ['assigned', 'out_for_delivery'].includes(o.status) && sinceMs(o.riderAssignedAt) > SLA_BREACH_MS
+      || o.status === 'otp_verified',
+    cod: (o) => String(o.paymentMethod || '').toLowerCase() === 'cod'
+      && ['cod_pending', 'pending', ''].includes(String(o.paymentStatus || '').toLowerCase())
+      && o.status !== 'cancelled',
+  };
+  let slaFilter = 'all';
 
   async function loadRiders() {
     try {
@@ -149,10 +177,12 @@
   }
 
   function renderTable(orders) {
-    if (!orders.length) {
+    const filtered = orders.filter(o => (SLA_FILTERS[slaFilter] || SLA_FILTERS.all)(o));
+    renderSlaCounts(orders);
+    if (!filtered.length) {
       tableWrap.innerHTML = `<div class="state-block">
-        <h4>No orders found</h4>
-        <p>${state.search || state.status ? 'Try a different search or filter.' : 'Orders will show up here as customers place them.'}</p>
+        <h4>${orders.length ? 'No orders match this SLA filter' : 'No orders found'}</h4>
+        <p>${orders.length ? 'Pick another SLA pill or clear the search.' : (state.search || state.status ? 'Try a different search or filter.' : 'Orders will show up here as customers place them.')}</p>
       </div>`;
       return;
     }
@@ -166,7 +196,7 @@
           </tr>
         </thead>
         <tbody>
-          ${orders.map(o => `
+          ${filtered.map(o => `
             <tr data-id="${esc(o.id)}">
               <td class="mono row-name">
                 <div>${esc(o.orderNumber)}</div>
@@ -188,6 +218,7 @@
               <td>
                 <div class="row-actions">
                   <button class="btn btn-sm btn-ghost order-detail-btn" data-id="${esc(o.id)}">Details</button>
+                  ${warRoomButtons(o)}
                   ${(TRANSITIONS[o.status] || []).length && o.status !== 'delivered' && o.status !== 'cancelled'
                     ? `<button class="icon-btn order-cancel-btn" data-id="${esc(o.id)}" title="Cancel order">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
@@ -208,6 +239,53 @@
       btn.addEventListener('click', () => openCancelModal(btn.dataset.id)));
     tableWrap.querySelectorAll('.order-detail-btn').forEach(btn =>
       btn.addEventListener('click', () => openDetail(btn.dataset.id)));
+    tableWrap.querySelectorAll('.order-override-btn').forEach(btn =>
+      btn.addEventListener('click', () => runOverride(btn.dataset.id, btn.dataset.action, btn.dataset.label)));
+  }
+
+  function renderSlaCounts(orders) {
+    if (!slaPills) return;
+    slaPills.querySelectorAll('.pill').forEach(pill => {
+      const key = pill.dataset.sla;
+      const n = orders.filter(o => (SLA_FILTERS[key] || SLA_FILTERS.all)(o)).length;
+      const label = { all: 'All orders', stuck_vendor: 'Vendor SLA breach', stuck_dispatch: 'Dispatch delay', doorstep: 'Doorstep / OTP stuck', cod: 'COD pending' }[key] || key;
+      pill.innerHTML = `${esc(label)}<span class="pill-count">${n}</span>`;
+    });
+  }
+
+  // Only show overrides that the backend will actually accept for this order.
+  function warRoomButtons(o) {
+    const btns = [];
+    if (['placed', 'confirmed'].includes(o.status)) {
+      btns.push(['force-accept', 'Force accept']);
+    }
+    if (['preparing', 'waiting_for_rider'].includes(o.status)) {
+      btns.push(['force-dispatch', 'Force dispatch']);
+    }
+    if (o.riderId && ['assigned', 'out_for_delivery', 'otp_verified'].includes(o.status)) {
+      btns.push(['force-deliver', 'Force deliver']);
+    }
+    return btns.map(([action, label]) =>
+      `<button class="btn btn-sm btn-ghost order-override-btn" data-id="${esc(o.id)}" data-action="${action}" data-label="${esc(label)}">${esc(label)}</button>`).join('');
+  }
+
+  async function runOverride(id, action, label) {
+    if (busy) return;
+    const reason = await askOverrideReason(label, action);
+    if (reason === null) return;
+    busy = true;
+    try {
+      const body = { reason };
+      if (action === 'force-deliver') {
+        // The backend requires explicit COD cash confirmation for cash orders.
+        body.codCashCollected = true;
+      }
+      await apiRequest(`/admin/orders/${encodeURIComponent(id)}/${action}`, { method: 'PUT', body });
+      showToast(`${label} applied.`, 'success');
+      await loadOrders();
+    } catch (err) {
+      showToast(err.message || `Could not apply ${label}.`, 'error');
+    } finally { busy = false; }
   }
 
   /* ── Loading (dual source, normalised) ─────────────────────── */
@@ -419,7 +497,79 @@
     }
   });
 
+  /* ── War-room override reason modal (Pillar 7) ─────────────── */
+  // Every override requires a reason; the backend also records it to
+  // AdminAuditLog and the order's adminOverrides history.
+  function overrideModal() {
+    let m = document.getElementById('order-override-modal');
+    if (m) return m;
+    m = document.createElement('div');
+    m.id = 'order-override-modal';
+    m.className = 'modal-overlay';
+    m.innerHTML = `<div class="modal-box" style="max-width:520px;">
+      <div class="modal-head"><h3 id="ov-title">Override</h3><button class="modal-close" data-close-modal="order-override-modal" type="button">✕</button></div>
+      <div class="modal-body">
+        <p class="hint" id="ov-desc" style="font-size:13px;"></p>
+        <div class="field">
+          <label for="ov-reason">Reason (required)</label>
+          <textarea id="ov-reason" rows="3" maxlength="300" placeholder="e.g. Vendor phone unreachable, confirmed by call"></textarea>
+          <div class="error-msg" id="ov-error"></div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <div class="modal-result" id="ov-result"></div>
+        <button type="button" class="btn btn-ghost" data-close-modal="order-override-modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="ov-confirm">Apply override</button>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+    return m;
+  }
+
+  const OVERRIDE_COPY = {
+    'force-accept': 'Accept this order on the vendor’s behalf and start the kitchen prep clock (KPT). Use only when the vendor cannot respond.',
+    'force-dispatch': 'Cancel the delayed-dispatch window and trigger rider assignment immediately.',
+    'force-deliver': 'Bypass the customer delivery OTP because the rider could not get network at the doorstep. For COD orders, cash collection is confirmed automatically.',
+  };
+
+  function askOverrideReason(label, action) {
+    return new Promise((resolve) => {
+      const m = overrideModal();
+      m.querySelector('#ov-title').textContent = label;
+      m.querySelector('#ov-desc').textContent = OVERRIDE_COPY[action] || 'Apply an admin override.';
+      const input = m.querySelector('#ov-reason');
+      input.value = '';
+      m.querySelector('#ov-error').textContent = '';
+      m.querySelector('#ov-result').className = 'modal-result';
+      const confirmBtn = m.querySelector('#ov-confirm');
+      confirmBtn.textContent = `Apply ${label}`;
+      const finish = (value) => {
+        confirmBtn.removeEventListener('click', onConfirm);
+        m.querySelector('[data-close-modal="order-override-modal"]').removeEventListener('click', onCancel);
+        closeModal('order-override-modal');
+        resolve(value);
+      };
+      const onCancel = () => finish(null);
+      const onConfirm = () => {
+        const value = input.value.trim();
+        if (!value) { m.querySelector('#ov-error').textContent = 'A reason is required for this override.'; return; }
+        finish(value);
+      };
+      confirmBtn.addEventListener('click', onConfirm);
+      m.querySelector('[data-close-modal="order-override-modal"]').addEventListener('click', onCancel);
+      openModal('order-override-modal');
+    });
+  }
+
   /* ── Filters ───────────────────────────────────────────────── */
+  slaPills?.addEventListener('click', (e) => {
+    const pill = e.target.closest('.pill');
+    if (!pill) return;
+    slaFilter = pill.dataset.sla || 'all';
+    slaPills.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p === pill));
+    renderTable(window.__adminOrderRows || []);
+  });
+
   searchInput.addEventListener('input', debounce(() => {
     state.search = searchInput.value.trim();
     state.page = 1;

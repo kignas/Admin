@@ -621,3 +621,20 @@ button, input, select, textarea {
 /* ── Toast info variant ───────────────────────────────────── */
 .toast.info { border-left: 3px solid var(--info); }
 .toast.warning { border-left: 3px solid var(--warning); }
+
+/* ── SLA filter pills (Pillar 7 war room) ──────────────────── */
+.sla-pills { display:flex; flex-wrap:wrap; gap:8px; padding:10px 16px 0; }
+.sla-pills .pill {
+  border:1px solid var(--line, #E5E7EB); background:var(--surface, #fff);
+  color:var(--text-muted); border-radius:999px; padding:5px 12px;
+  font-size:12.5px; font-weight:500; cursor:pointer; transition:all .15s ease;
+}
+.sla-pills .pill:hover { border-color:var(--accent); color:var(--text); }
+.sla-pills .pill.active { background:var(--accent-wash, #FFF5DC); border-color:var(--accent); color:var(--text); font-weight:600; }
+.sla-pills .pill .pill-count { margin-left:6px; font-family:var(--mono, monospace); opacity:.75; }
+
+/* ── Utility helpers used by the settlement / support consoles ── */
+/* `stats-grid` is the alias used by older settlement markup; keep both
+   spellings pointing at the same responsive grid. */
+.stats-grid { display:grid; gap:12px; }
+.text-danger { color: var(--danger, #DC2626); }

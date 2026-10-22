@@ -392,19 +392,314 @@
     }
   }
 
+  /* ── Pillar 5: Restaurant Settlements tab ───────────────────── */
+  const restWrap = document.getElementById('rest-settle-table-wrap');
+  const restCount = document.getElementById('rest-settle-count');
+  let restRows = [];
+
+  async function loadRestaurantSettlements() {
+    if (!restWrap) return;
+    restWrap.innerHTML = '<div class="state-block"><div class="spinner-lg"></div></div>';
+    try {
+      const res = await apiRequest('/settlements/restaurants');
+      restRows = res.data || [];
+      restCount.textContent = `${restRows.length} restaurant${restRows.length === 1 ? '' : 's'} with unsettled balance`;
+      if (!restRows.length) {
+        restWrap.innerHTML = '<div class="state-block"><h4>No unsettled vendor balances</h4><p>Delivered orders create a transparent vendor ledger entry per order.</p></div>';
+        return;
+      }
+      restWrap.innerHTML = `<table class="data-table"><thead><tr>
+          <th>Restaurant</th><th>Unsettled balance</th><th>Gross food bill</th><th>Commission</th>
+          <th>Vendor discount share</th><th>Penalty adj.</th><th>Orders</th><th></th>
+        </tr></thead><tbody>${restRows.map(r => `
+          <tr data-id="${esc(r.restaurantId)}">
+            <td class="row-name">${esc(r.name)}${r.commissionRate != null ? `<div class="row-sub">commission ${esc(r.commissionRate)}%</div>` : ''}</td>
+            <td class="mono row-name">${formatMoney(r.unsettledBalance)}</td>
+            <td class="mono">${formatMoney(r.grossFoodBill)}</td>
+            <td class="mono">${formatMoney(r.commissionAmount)}</td>
+            <td class="mono">${formatMoney(r.vendorDiscountShare)}</td>
+            <td class="mono">${formatMoney(r.penaltyAdjustment)}</td>
+            <td class="mono">${Number(r.orderCount) || 0}</td>
+            <td><div class="row-actions">
+              <button class="btn btn-sm btn-ghost rest-statement" data-id="${esc(r.restaurantId)}" data-name="${esc(r.name)}">Statement</button>
+              <button class="btn btn-sm btn-ghost rest-adjust" data-id="${esc(r.restaurantId)}" data-name="${esc(r.name)}">Adjust</button>
+            </div></td>
+          </tr>`).join('')}</tbody></table>`;
+      restWrap.querySelectorAll('.rest-statement').forEach(b => b.addEventListener('click', () => openRestaurantStatement(b.dataset.id, b.dataset.name)));
+      restWrap.querySelectorAll('.rest-adjust').forEach(b => b.addEventListener('click', () => openRestaurantAdjustment(b.dataset.id, b.dataset.name)));
+    } catch (err) {
+      restWrap.innerHTML = `<div class="state-block"><h4>Could not load restaurant settlements</h4><p>${esc(err.message)}</p>
+        <button class="btn btn-ghost btn-sm" id="rest-settle-retry">Retry</button></div>`;
+      document.getElementById('rest-settle-retry')?.addEventListener('click', loadRestaurantSettlements);
+    }
+  }
+
+  function statementModal() {
+    let m = document.getElementById('rest-statement-modal');
+    if (m) return m;
+    m = document.createElement('div'); m.id = 'rest-statement-modal'; m.className = 'modal-overlay';
+    m.innerHTML = `<div class="modal-box" style="max-width:900px;">
+      <div class="modal-head"><h3 id="rs-title">Restaurant statement</h3><button class="modal-close" data-close-modal="rest-statement-modal" type="button">✕</button></div>
+      <div class="modal-body" id="rs-body"><div class="state-block"><div class="spinner-lg"></div></div></div>
+      <div class="modal-foot">
+        <div class="modal-result" id="rs-result"></div>
+        <button type="button" class="btn btn-ghost" data-close-modal="rest-statement-modal">Close</button>
+        <button type="button" class="btn btn-primary" id="rs-batch">Create settlement batch / Mark paid</button>
+      </div>
+    </div>`;
+    document.body.appendChild(m);
+    m.querySelector('#rs-batch').addEventListener('click', () => createBatchFromStatement(m));
+    return m;
+  }
+
+  let currentStatement = null;
+
+  async function openRestaurantStatement(id, name) {
+    const m = statementModal();
+    m.dataset.id = id;
+    m.querySelector('#rs-title').textContent = `Statement — ${name || id}`;
+    m.querySelector('#rs-result').className = 'modal-result';
+    const body = m.querySelector('#rs-body');
+    body.innerHTML = '<div class="state-block"><div class="spinner-lg"></div></div>';
+    openModal('rest-statement-modal');
+    try {
+      const res = await apiRequest(`/settlements/restaurants/${encodeURIComponent(id)}/statement`);
+      currentStatement = res.data || {};
+      const t = currentStatement.totals || {};
+      const orders = currentStatement.orders || [];
+      body.innerHTML = `
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-bottom:14px;">
+          <div class="stat-card"><div class="stat-label">Unsettled balance</div><div class="stat-value mono">${formatMoney(currentStatement.unsettledBalance)}</div></div>
+          <div class="stat-card"><div class="stat-label">Gross food bill</div><div class="stat-value mono">${formatMoney(t.grossFoodBill)}</div></div>
+          <div class="stat-card"><div class="stat-label">Commission</div><div class="stat-value mono">${formatMoney(t.commissionAmount)}</div></div>
+          <div class="stat-card"><div class="stat-label">Penalty adj.</div><div class="stat-value mono">${formatMoney(t.penaltyAdjustment)}</div></div>
+        </div>
+        <div class="hint" style="margin-bottom:8px;">Select the eligible entries below to settle. Only entries marked <span class="badge badge-success">eligible</span> can be batched.</div>
+        <div class="table-wrap"><table class="data-table"><thead><tr>
+          <th></th><th>Order</th><th>Gross food bill</th><th>Commission</th><th>Discount share</th><th>Penalty</th><th>Net payable</th><th>Status</th>
+        </tr></thead><tbody>${orders.map(o => `
+          <tr>
+            <td>${o.status === 'eligible' ? `<input type="checkbox" class="rs-check" data-id="${esc(o._id)}" checked>` : ''}</td>
+            <td class="mono">${esc(o.orderNumber || '—')}</td>
+            <td class="mono">${formatMoney(o.grossFoodBill ?? o.foodSales)}</td>
+            <td class="mono">${formatMoney(o.commissionAmount)}</td>
+            <td class="mono">${formatMoney(o.vendorDiscountShare)}</td>
+            <td class="mono">${formatMoney(o.penaltyAdjustment)}</td>
+            <td class="mono row-name">${formatMoney(o.netVendorPayable ?? o.netSettlementAmount)}</td>
+            <td><span class="badge ${LEDGER_BADGE[o.status] || 'badge-muted'}">${esc(o.status)}</span></td>
+          </tr>`).join('')}</tbody></table></div>`;
+    } catch (err) {
+      body.innerHTML = `<div class="state-block"><h4>Could not load statement</h4><p>${esc(err.message)}</p></div>`;
+    }
+  }
+
+  async function createBatchFromStatement(m) {
+    const ids = [...m.querySelectorAll('.rs-check:checked')].map(cb => cb.dataset.id);
+    if (!ids.length) { showToast('Select at least one eligible entry.', 'error'); return; }
+    const reference = await askConfirmation({
+      title: `Mark ${ids.length} entr${ids.length === 1 ? 'y' : 'ies'} paid?`,
+      desc: 'Confirm the real bank/UPI transfer has happened. This records the bank UTR and marks the selected ledger entries settled.',
+      label: 'Bank UTR / transfer reference (required)',
+      placeholder: 'Enter the actual bank/UPI UTR',
+      required: true,
+      confirmText: 'Record batch',
+    });
+    if (reference === null) return;
+    busy = true;
+    const btn = m.querySelector('#rs-batch');
+    btn.disabled = true;
+    try {
+      const res = await apiRequest('/settlements/batches', { method: 'POST', body: { ledgerIds: ids, reference, bankUtr: reference } });
+      showToast(`Settlement batch created — ${formatMoney(res.data?.amount)} for ${res.data?.count} entries.`, 'success');
+      await Promise.all([loadRestaurantSettlements(), loadLedger(), loadIntegrity()]);
+      await openRestaurantStatement(m.dataset.id, m.querySelector('#rs-title').textContent.replace('Statement — ', ''));
+    } catch (err) {
+      const result = m.querySelector('#rs-result');
+      result.textContent = err.message || 'Could not create the batch.';
+      result.className = 'modal-result show error';
+    } finally { busy = false; btn.disabled = false; }
+  }
+
+  async function openRestaurantAdjustment(id, name) {
+    const amount = prompt(`Manual adjustment for ${name}.\n\nEnter the amount in ₹ (positive number):`);
+    if (amount === null) return;
+    const value = Number(amount);
+    if (!Number.isFinite(value) || value <= 0) { showToast('Enter a valid amount greater than zero.', 'error'); return; }
+    const direction = confirm('OK = CREDIT the vendor (add to balance).\nCancel = DEBIT the vendor (subtract from balance).') ? 'credit' : 'debit';
+    const note = prompt('Note / reason for this adjustment (optional):') || '';
+    busy = true;
+    try {
+      await apiRequest(`/settlements/restaurants/${encodeURIComponent(id)}/adjustment`, { method: 'POST', body: { amount: value, direction, note } });
+      showToast(`Adjustment recorded (${direction} ${formatMoney(value)}).`, 'success');
+      await Promise.all([loadRestaurantSettlements(), loadLedger(), loadIntegrity()]);
+    } catch (err) {
+      showToast(err.message || 'Could not record the adjustment.', 'error');
+    } finally { busy = false; }
+  }
+
+  function exportSettlementsCsv() {
+    const token = AdminAuth.getToken();
+    // CSV is a plain GET; fetch with the auth header then trigger a download so
+    // the JWT is never placed in the URL.
+    fetch(`${CONFIG.API_BASE_URL}/settlements/export.csv`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`Export failed (${res.status}).`);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `settlements-${Date.now()}.csv`;
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+        showToast('CSV export downloaded.', 'success');
+      })
+      .catch(err => showToast(err.message || 'Could not export CSV.', 'error'));
+  }
+
+  /* ── Pillar 6: Rider COD & payouts tab ──────────────────────── */
+  const riderWrap = document.getElementById('rider-settle-table-wrap');
+  const riderCount = document.getElementById('rider-settle-count');
+
+  async function loadRiderSettlements() {
+    if (!riderWrap) return;
+    riderWrap.innerHTML = '<div class="state-block"><div class="spinner-lg"></div></div>';
+    try {
+      const res = await apiRequest('/settlements/riders');
+      const rows = res.data || [];
+      riderCount.textContent = `${rows.length} rider${rows.length === 1 ? '' : 's'}`;
+      if (!rows.length) {
+        riderWrap.innerHTML = '<div class="state-block"><h4>No riders yet</h4><p>Rider earnings and COD cash appear here after deliveries.</p></div>';
+        return;
+      }
+      riderWrap.innerHTML = `<table class="data-table"><thead><tr>
+          <th>Rider</th><th>Total earnings</th><th>COD cash held</th><th>Cash limit</th><th>Net payable</th><th></th>
+        </tr></thead><tbody>${rows.map(r => {
+        const overLimit = r.codCashLimit > 0 && r.codCashHeld >= r.codCashLimit;
+        return `<tr data-id="${esc(r.riderId)}">
+          <td class="row-name">${esc(r.name || '—')}<div class="row-sub">${esc(r.phone || '')}${r.isActive ? '' : ' · disabled'}</div></td>
+          <td class="mono">${formatMoney(r.totalEarnings)}</td>
+          <td class="mono ${overLimit ? 'text-danger' : ''}">${formatMoney(r.codCashHeld)}${overLimit ? ' <span class="badge badge-danger">at limit</span>' : ''}</td>
+          <td class="mono">${formatMoney(r.codCashLimit)}</td>
+          <td class="mono row-name">${formatMoney(r.netPayable)}</td>
+          <td><div class="row-actions">
+            <button class="btn btn-sm btn-ghost rider-deposit" data-id="${esc(r.riderId)}" data-name="${esc(r.name)}" ${r.codCashHeld <= 0 ? 'disabled' : ''}>Record COD deposit</button>
+            <button class="btn btn-sm btn-ghost rider-payout" data-id="${esc(r.riderId)}" data-name="${esc(r.name)}" data-payable="${esc(r.netPayable)}" ${r.netPayable <= 0 ? 'disabled' : ''}>Settle payout</button>
+            <button class="btn btn-sm btn-ghost rider-ledger" data-id="${esc(r.riderId)}" data-name="${esc(r.name)}">Ledger</button>
+          </div></td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
+      riderWrap.querySelectorAll('.rider-deposit').forEach(b => b.addEventListener('click', () => recordCodDeposit(b.dataset.id, b.dataset.name)));
+      riderWrap.querySelectorAll('.rider-payout').forEach(b => b.addEventListener('click', () => settleRiderPayout(b.dataset.id, b.dataset.name, b.dataset.payable)));
+      riderWrap.querySelectorAll('.rider-ledger').forEach(b => b.addEventListener('click', () => openRiderLedger(b.dataset.id, b.dataset.name)));
+    } catch (err) {
+      riderWrap.innerHTML = `<div class="state-block"><h4>Could not load rider settlements</h4><p>${esc(err.message)}</p>
+        <button class="btn btn-ghost btn-sm" id="rider-settle-retry">Retry</button></div>`;
+      document.getElementById('rider-settle-retry')?.addEventListener('click', loadRiderSettlements);
+    }
+  }
+
+  async function recordCodDeposit(riderId, name) {
+    const amount = prompt(`Record COD cash deposit from ${name}.\n\nEnter the amount of cash handed to Admin (₹):`);
+    if (amount === null) return;
+    const value = Number(amount);
+    if (!Number.isFinite(value) || value <= 0) { showToast('Enter a valid amount greater than zero.', 'error'); return; }
+    const reference = prompt('Deposit reference / receipt no. (optional):') || '';
+    busy = true;
+    try {
+      await apiRequest(`/settlements/riders/${encodeURIComponent(riderId)}/cod-deposit`, { method: 'POST', body: { amount: value, reference } });
+      showToast('COD cash deposit recorded.', 'success');
+      await loadRiderSettlements();
+    } catch (err) {
+      showToast(err.message || 'Could not record the COD deposit.', 'error');
+    } finally { busy = false; }
+  }
+
+  async function settleRiderPayout(riderId, name, payable) {
+    const reference = await askConfirmation({
+      title: `Settle payout for ${name}?`,
+      desc: `Net payable is ${formatMoney(payable)}. Confirm the real bank/UPI transfer has happened — this records the UTR and the payout.`,
+      label: 'Bank/UPI UTR reference (required)',
+      placeholder: 'Enter the UTR / transfer reference',
+      required: true,
+      confirmText: 'Record payout',
+    });
+    if (reference === null) return;
+    busy = true;
+    try {
+      await apiRequest(`/settlements/riders/${encodeURIComponent(riderId)}/payout`, { method: 'POST', body: { reference, utr: reference } });
+      showToast('Rider payout recorded.', 'success');
+      await loadRiderSettlements();
+    } catch (err) {
+      showToast(err.message || 'Could not record the rider payout.', 'error');
+    } finally { busy = false; }
+  }
+
+  function riderLedgerModal() {
+    let m = document.getElementById('rider-ledger-modal');
+    if (m) return m;
+    m = document.createElement('div'); m.id = 'rider-ledger-modal'; m.className = 'modal-overlay';
+    m.innerHTML = `<div class="modal-box" style="max-width:840px;">
+      <div class="modal-head"><h3 id="rl-title">Rider ledger</h3><button class="modal-close" data-close-modal="rider-ledger-modal" type="button">✕</button></div>
+      <div class="modal-body" id="rl-body"><div class="state-block"><div class="spinner-lg"></div></div></div>
+      <div class="modal-foot"><button type="button" class="btn btn-ghost" data-close-modal="rider-ledger-modal">Close</button></div>
+    </div>`;
+    document.body.appendChild(m); return m;
+  }
+
+  async function openRiderLedger(riderId, name) {
+    const m = riderLedgerModal();
+    m.querySelector('#rl-title').textContent = `Ledger — ${name || riderId}`;
+    const body = m.querySelector('#rl-body');
+    body.innerHTML = '<div class="state-block"><div class="spinner-lg"></div></div>';
+    openModal('rider-ledger-modal');
+    try {
+      const res = await apiRequest(`/settlements/riders/${encodeURIComponent(riderId)}/ledger`);
+      const b = res.data?.balance || {};
+      const entries = res.data?.entries || [];
+      body.innerHTML = `
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));margin-bottom:14px;">
+          <div class="stat-card"><div class="stat-label">Total earnings</div><div class="stat-value mono">${formatMoney(b.totalEarnings)}</div></div>
+          <div class="stat-card"><div class="stat-label">COD cash held</div><div class="stat-value mono">${formatMoney(b.codCashHeld)}</div></div>
+          <div class="stat-card"><div class="stat-label">Payouts</div><div class="stat-value mono">${formatMoney(b.totalPayouts)}</div></div>
+          <div class="stat-card"><div class="stat-label">Net payable</div><div class="stat-value mono">${formatMoney(b.netPayable)}</div></div>
+        </div>
+        ${entries.length ? `<div class="table-wrap"><table class="data-table"><thead><tr><th>Type</th><th>Order</th><th>Amount</th><th>Reference</th><th>When</th></tr></thead><tbody>${entries.map(e => `
+          <tr><td>${esc(String(e.entryType || '').replace(/_/g, ' '))}</td><td class="mono">${esc(e.orderNumber || '—')}</td>
+          <td class="mono">${formatMoney(e.amount)}</td><td class="row-sub">${esc(e.reference || e.note || '—')}</td>
+          <td class="mono row-sub">${formatDate(e.createdAt)}</td></tr>`).join('')}</tbody></table></div>`
+          : '<div class="state-block"><p>No ledger entries yet.</p></div>'}`;
+    } catch (err) {
+      body.innerHTML = `<div class="state-block"><h4>Could not load rider ledger</h4><p>${esc(err.message)}</p></div>`;
+    }
+  }
+
   /* ── Tabs & filters ────────────────────────────────────────── */
   document.getElementById('settlements-tabs')?.addEventListener('click', (e) => {
     const tab = e.target.closest('.tab');
     if (!tab) return;
     activeTab = tab.dataset.tab;
     document.querySelectorAll('#settlements-tabs .tab').forEach(t => t.classList.toggle('active', t === tab));
-    document.getElementById('settlements-panel-ledger').style.display = activeTab === 'ledger' ? '' : 'none';
-    document.getElementById('settlements-panel-payouts').style.display = activeTab === 'payouts' ? '' : 'none';
+    const panels = { ledger: 'settlements-panel-ledger', payouts: 'settlements-panel-payouts', restaurants: 'settlements-panel-restaurants', riders: 'settlements-panel-riders' };
+    Object.entries(panels).forEach(([key, elId]) => {
+      const el = document.getElementById(elId);
+      if (el) el.style.display = activeTab === key ? '' : 'none';
+    });
     if (activeTab === 'payouts' && !payoutsWrap.dataset.loaded) {
       payoutsWrap.dataset.loaded = 'true';
       loadPayouts();
     }
+    if (activeTab === 'restaurants' && !restWrap.dataset.loaded) {
+      restWrap.dataset.loaded = 'true';
+      loadRestaurantSettlements();
+    }
+    if (activeTab === 'riders' && !riderWrap.dataset.loaded) {
+      riderWrap.dataset.loaded = 'true';
+      loadRiderSettlements();
+    }
   });
+
+  document.getElementById('rest-settle-refresh')?.addEventListener('click', loadRestaurantSettlements);
+  document.getElementById('rest-settle-export')?.addEventListener('click', exportSettlementsCsv);
+  document.getElementById('rider-settle-refresh')?.addEventListener('click', loadRiderSettlements);
 
   ledgerStatusFilter?.addEventListener('change', () => {
     ledgerState.status = ledgerStatusFilter.value;
@@ -421,6 +716,8 @@
     loadIntegrity();
     loadLedger();
     if (payoutsWrap.dataset.loaded) loadPayouts();
+    if (restWrap.dataset.loaded) loadRestaurantSettlements();
+    if (riderWrap.dataset.loaded) loadRiderSettlements();
   });
 
   document.addEventListener('admin:view-changed', (e) => {
@@ -428,6 +725,8 @@
       loadIntegrity();
       loadLedger();
       if (payoutsWrap.dataset.loaded) loadPayouts();
+      if (restWrap.dataset.loaded) loadRestaurantSettlements();
+      if (riderWrap.dataset.loaded) loadRiderSettlements();
     }
   });
 })();

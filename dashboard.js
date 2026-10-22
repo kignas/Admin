@@ -22,6 +22,7 @@
   const statGrid = document.getElementById('stat-grid');
   const alertsWrap = document.getElementById('dashboard-alerts');
   const quickActionsWrap = document.getElementById('dashboard-quick-actions');
+  const platformControlsWrap = document.getElementById('dashboard-platform-controls');
   const revenueWrap = document.getElementById('revenue-chart-wrap');
   const revenueRange = document.getElementById('revenue-range');
   const errorBanner = document.getElementById('dashboard-error');
@@ -276,6 +277,86 @@
     errorMsg.textContent = `${errors.length} dashboard source(s) failed: ${errors[0]} — no fallback host is used. Check ${apiHost} and retry.`;
   }
 
+  // ── Pillar 1: 1-tap platform control switches on the dashboard ──────
+  // Reads the live capacity snapshot + current configuration, and writes
+  // toggles/messages through PUT /api/platform/config. Also surfaces the auto
+  // shortage circuit breaker's live capacity headroom.
+  const DASH_SWITCHES = [
+    { key: 'isUnderMaintenance', label: 'Maintenance Mode', hint: 'Block all new checkouts' },
+    { key: 'isDeliveryPausedShortage', label: 'Delivery Partner Shortage', hint: 'Pause checkout while riders are scarce' },
+    { key: 'autoShortageCircuitBreaker', label: 'Auto Shortage Breaker', hint: 'Pause automatically on capacity breach' },
+    { key: 'isRainSurgeActive', label: 'Rain Surge', hint: 'Apply rain surge fee + extra ETA' },
+    { key: 'isCodEnabled', label: 'Cash on Delivery', hint: 'Allow COD orders within the cap' },
+  ];
+  const DASH_MESSAGE_FIELDS = [
+    { key: 'maintenanceMessage', label: 'Maintenance message' },
+    { key: 'shortageBannerMessage', label: 'Shortage banner message' },
+  ];
+
+  async function loadPlatformControls() {
+    if (!platformControlsWrap) return;
+    platformControlsWrap.innerHTML = '<div class="state-block"><div class="spinner-lg"></div></div>';
+    try {
+      const [capacityRes, configRes] = await Promise.all([
+        apiRequest('/admin/delivery-capacity'),
+        apiRequest('/platform/config'),
+      ]);
+      const capacity = capacityRes.data?.capacity || {};
+      const settings = configRes.data || {};
+      const maxPerRider = Number(settings.maxActiveOrdersPerOnlineRider) || 3;
+      const headroom = capacity.activeOrdersPerRider == null
+        ? '—'
+        : `${capacity.activeOrdersPerRider} / ${maxPerRider}`;
+      const breached = capacity.onlineRiders === 0 || (capacity.activeOrdersPerRider != null && capacity.activeOrdersPerRider > maxPerRider);
+
+      platformControlsWrap.innerHTML = `
+        <div class="hint" style="margin-bottom:10px;">
+          Online riders: <strong class="mono">${Number(capacity.onlineRiders ?? 0)}</strong>
+          · active orders: <strong class="mono">${Number(capacity.activeOrders ?? 0)}</strong>
+          · load/rider: <strong class="mono">${esc(headroom)}</strong>
+          ${breached ? '<span class="badge badge-danger" style="margin-left:8px;">CAPACITY BREACHED</span>' : ''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${DASH_SWITCHES.map(s => `
+            <label style="display:flex;align-items:center;gap:10px;">
+              <input type="checkbox" class="dash-toggle" data-key="${esc(s.key)}" ${settings[s.key] === true ? 'checked' : ''}>
+              <span style="flex:1;"><strong>${esc(s.label)}</strong> <span class="row-sub">${esc(s.hint)}</span></span>
+            </label>`).join('')}
+        </div>
+        <div class="form-grid" style="margin-top:12px;">
+          ${DASH_MESSAGE_FIELDS.map(f => `
+            <div class="field">
+              <label>${esc(f.label)}</label>
+              <input class="dash-msg" data-key="${esc(f.key)}" type="text" value="${esc(settings[f.key] ?? '')}">
+            </div>`).join('')}
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-primary btn-sm" id="dash-controls-save">Save switches</button>
+          <span class="hint">Writes to <code>PUT /api/platform/config</code>.</span>
+        </div>`;
+      document.getElementById('dash-controls-save')?.addEventListener('click', savePlatformControls);
+    } catch (err) {
+      platformControlsWrap.innerHTML = `<div class="state-block"><h4>Could not load platform controls</h4><p>${esc(err.message)}</p>
+        <button class="btn btn-ghost btn-sm" id="dash-controls-retry">Retry</button></div>`;
+      document.getElementById('dash-controls-retry')?.addEventListener('click', loadPlatformControls);
+    }
+  }
+
+  async function savePlatformControls() {
+    const patch = {};
+    platformControlsWrap.querySelectorAll('.dash-toggle').forEach(cb => { patch[cb.dataset.key] = cb.checked; });
+    platformControlsWrap.querySelectorAll('.dash-msg').forEach(inp => { patch[inp.dataset.key] = inp.value; });
+    const btn = document.getElementById('dash-controls-save');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="btn-spinner"></span>'; }
+    try {
+      await apiRequest('/platform/config', { method: 'PUT', body: { settings: patch } });
+      showToast('Platform switches updated.', 'success');
+      await loadPlatformControls();
+    } catch (err) {
+      showToast(err.message || 'Could not update platform switches.', 'error');
+    } finally { if (btn) { btn.disabled = false; btn.textContent = 'Save switches'; } }
+  }
+
   async function loadDashboard() {
     if (loading) return;
     loading = true;
@@ -324,6 +405,7 @@
     renderStats(r);
     renderAlerts(r);
     renderQuickActions();
+    loadPlatformControls();
     renderRecentOrders(r.recentOrders.ok ? (r.recentOrders.data || []) : []);
     if (!r.recentOrders.ok) {
       document.getElementById('recent-orders-wrap').innerHTML =

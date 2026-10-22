@@ -233,12 +233,17 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Rider</th><th>Contact</th><th>Vehicle</th><th>Zone</th><th>Online</th><th>Status</th><th></th>
+            <th>Rider</th><th>Contact</th><th>Vehicle</th><th>Zone</th><th>Online</th>
+            <th>Earnings</th><th>COD cash held</th><th>Net payable</th><th>Status</th><th></th>
           </tr>
         </thead>
         <tbody>
           ${riders.map(r => {
             const rd = r.riderDetails || {};
+            const bal = riderBalances.get(String(r._id));
+            const cash = bal ? bal.codCashHeld : Number(rd.cashInHand) || 0;
+            const limit = bal ? bal.codCashLimit : Number(rd.codCashLimit) || 0;
+            const overLimit = limit > 0 && cash >= limit;
             return `
             <tr data-id="${r._id}">
               <td>
@@ -262,6 +267,9 @@
               <td>
                 <span class="badge ${rd.isOnline ? 'badge-success' : 'badge-muted'}">${rd.isOnline ? 'Online' : 'Offline'}</span>
               </td>
+              <td class="mono">${bal ? formatMoney(bal.totalEarnings) : '—'}</td>
+              <td class="mono ${overLimit ? 'text-danger' : ''}">${formatMoney(cash)}${overLimit ? ' <span class="badge badge-danger">at limit</span>' : ''}</td>
+              <td class="mono row-name">${bal ? formatMoney(bal.netPayable) : '—'}</td>
               <td>
                 <label class="switch" title="${r.isActive ? 'Disable rider' : 'Enable rider'}">
                   <input type="checkbox" class="rider-toggle" data-id="${r._id}" ${r.isActive ? 'checked' : ''} />
@@ -275,6 +283,12 @@
                   </button>
                   <button class="icon-btn rider-edit-btn" data-id="${r._id}" title="Edit rider">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  </button>
+                  <button class="icon-btn rider-cod-btn" data-id="${r._id}" title="Record COD cash deposit" ${cash <= 0 ? 'disabled' : ''}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                  <button class="icon-btn rider-payout-btn" data-id="${r._id}" title="Settle payout" ${!bal || bal.netPayable <= 0 ? 'disabled' : ''}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
                   </button>
                   <button class="icon-btn rider-delete-btn" data-id="${r._id}" title="Delete rider">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/><path d="M10 11v6M14 11v6"/></svg>
@@ -297,10 +311,63 @@
     tableWrap.querySelectorAll('.rider-edit-btn').forEach(btn => {
       btn.addEventListener('click', () => openEditModal(currentRiders.find(r => r._id === btn.dataset.id)));
     });
+    tableWrap.querySelectorAll('.rider-cod-btn').forEach(btn => {
+      btn.addEventListener('click', () => recordCodDeposit(btn.dataset.id));
+    });
+    tableWrap.querySelectorAll('.rider-payout-btn').forEach(btn => {
+      btn.addEventListener('click', () => settlePayout(btn.dataset.id));
+    });
     tableWrap.querySelectorAll('.rider-delete-btn').forEach(btn => {
       const rider = currentRiders.find(r => r._id === btn.dataset.id);
       btn.addEventListener('click', () => deleteRider(rider));
     });
+  }
+
+  /* ── Pillar 6: rider earnings & COD cash reconciliation ─────── */
+  const riderBalances = new Map();
+
+  async function loadRiderBalances() {
+    try {
+      const res = await apiRequest('/settlements/riders');
+      const rows = res.data || [];
+      riderBalances.clear();
+      rows.forEach(b => riderBalances.set(String(b.riderId), b));
+    } catch (_) { /* balances are supplementary — the table still renders */ }
+  }
+
+  async function recordCodDeposit(riderId) {
+    const bal = riderBalances.get(String(riderId));
+    const held = bal ? bal.codCashHeld : 0;
+    const amount = prompt(`Record COD cash deposit (rider holds ${formatMoney(held)}).\n\nEnter the amount of cash handed to Admin (₹):`);
+    if (amount === null) return;
+    const value = Number(amount);
+    if (!Number.isFinite(value) || value <= 0) { showToast('Enter a valid amount greater than zero.', 'error'); return; }
+    const reference = prompt('Deposit reference / receipt no. (optional):') || '';
+    try {
+      await apiRequest(`/settlements/riders/${encodeURIComponent(riderId)}/cod-deposit`, { method: 'POST', body: { amount: value, reference } });
+      showToast('COD cash deposit recorded.', 'success');
+      await loadRiderBalances();
+      loadRiders();
+    } catch (err) {
+      showToast(err.message || 'Could not record the COD deposit.', 'error');
+    }
+  }
+
+  async function settlePayout(riderId) {
+    const bal = riderBalances.get(String(riderId));
+    const payable = bal ? bal.netPayable : 0;
+    const reference = prompt(`Settle rider payout (net payable ${formatMoney(payable)}).\n\nConfirm the bank/UPI transfer happened and enter its UTR/reference:`);
+    if (reference === null) return;
+    const ref = reference.trim();
+    if (!ref) { showToast('A bank/UPI UTR reference is required.', 'error'); return; }
+    try {
+      await apiRequest(`/settlements/riders/${encodeURIComponent(riderId)}/payout`, { method: 'POST', body: { reference: ref, utr: ref } });
+      showToast('Rider payout recorded.', 'success');
+      await loadRiderBalances();
+      loadRiders();
+    } catch (err) {
+      showToast(err.message || 'Could not record the rider payout.', 'error');
+    }
   }
 
   async function loadRiders() {
@@ -554,7 +621,7 @@
   document.addEventListener('admin:view-changed', (e) => {
     if (e.detail.view === 'manage-riders') {
       loadRiderApplications();
-      loadRiders();
+      loadRiderBalances().then(loadRiders);
       loadStats();
     }
   });
